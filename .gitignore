@@ -1,0 +1,6 @@
+*.o
+sundry/
+data/
+python/
+revgeod
+lmdb-ll-look
