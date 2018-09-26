@@ -1,6 +1,6 @@
 *.o
 sundry/
 data/
-python/
+revgeod-python/
 revgeod
 lmdb-ll-look
