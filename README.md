@@ -20,3 +20,7 @@ opencage_millis 4304.350000
 3. {"address":{"village":"La Terre Noire, 77510 Sablonnières, France","s":"lmdb"}}
 
 
+## valgrind
+
+Thanks to [this post](https://blogs.kolabnow.com/2018/06/07/a-short-guide-to-lmdb) I learn that
+> in order to run LMDB under Valgrind, the maximum mapsize must be smaller than half your available ram.
