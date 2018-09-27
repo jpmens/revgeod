@@ -167,8 +167,11 @@ static int get_stats(struct MHD_Connection *connection)
 	JsonNode *json = json_mkobject(), *counters = json_mkobject();
 	char *js;
 
-	json_append_member(counters, "_whoami",         json_mkstring(__FILE__));
-	json_append_member(counters, "_tst",            json_mknumber(time(0)));
+	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
+	json_append_member(counters, "_tst",		json_mknumber(time(0)));
+#ifdef STATSD
+	json_append_member(counters, "_statsd",		json_mkbool(true));
+#endif
 	json_append_member(counters, "stats",		json_mknumber(++st.stats));
 	json_append_member(counters, "requests",	json_mknumber(st.requests));
 	json_append_member(counters, "geocode_failed",	json_mknumber(st.geofail));
