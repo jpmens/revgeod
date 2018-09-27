@@ -1,9 +1,11 @@
 
+include config.mk
+
 # leave undefined if you don't want to use statsd
 STATSDHOST="127.0.0.1"
 
 CFLAGS= -Wall -Werror
-LDFLAGS=-lmicrohttpd -lgnutls -lcurl -llmdb
+LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
 ifneq ($(origin STATSDHOST), undefined)
 	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
