@@ -168,7 +168,6 @@ static int get_stats(struct MHD_Connection *connection)
 	char *js;
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
-	json_append_member(counters, "_tst",		json_mknumber(time(0)));
 #ifdef STATSD
 	json_append_member(counters, "_statsd",		json_mkbool(true));
 #endif
@@ -178,8 +177,9 @@ static int get_stats(struct MHD_Connection *connection)
 	json_append_member(counters, "opencage",	json_mknumber(st.opencage));
 	json_append_member(counters, "lmdb",		json_mknumber(st.lmdb));
 
-	json_append_member(json, "stats", counters);
-	json_append_member(json, "uptime", json_mknumber(time(0) - st.launchtime));
+	json_append_member(json, "stats",	counters);
+	json_append_member(json, "uptime",	json_mknumber(time(0) - st.launchtime));
+	json_append_member(json, "tst",		json_mknumber(time(0)));
 
 	if ((js = json_stringify(json, NULL)) != NULL) {
 		int ret = send_content(connection, js, "application/json", MHD_HTTP_OK);
