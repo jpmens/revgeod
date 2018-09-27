@@ -34,7 +34,8 @@ struct db *db_open(char *path, char *dbname, int rdonly)
 {
 	MDB_txn *txn = NULL;
 	int rc;
-	unsigned int flags = 0, dbiflags = 0, perms = 0664;
+	/* MDB_NOTLS is used to disable any LMDB internal thread related locking; */
+	unsigned int flags = MDB_NOTLS, dbiflags = 0, perms = 0664;
 	struct db *db;
 
 	if ((db = malloc(sizeof (struct db))) == NULL)
