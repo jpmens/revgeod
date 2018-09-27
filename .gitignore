@@ -4,3 +4,4 @@ data/
 revgeod-python/
 revgeod
 lmdb-ll-look
+run.sh
