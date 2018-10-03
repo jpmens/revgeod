@@ -200,7 +200,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	const char *s_lat, *s_lon;
 	JsonNode *json, *obj;
 	char *geohash, *ap, *source, apbuf[8192];
-	static UT_string *addr, *rawdata;
+	static UT_string *addr, *rawdata, *locality, *cc;
 	struct timeval t_stop_oc, t_start_oc;
 	double opencage_millis;
 
@@ -225,6 +225,8 @@ static int get_reversegeo(struct MHD_Connection *connection)
 
 	utstring_renew(addr);
 	utstring_renew(rawdata);
+	utstring_renew(locality);
+	utstring_renew(cc);
 
 	json = json_mkobject();
 	obj = json_mkobject();
@@ -233,18 +235,31 @@ static int get_reversegeo(struct MHD_Connection *connection)
 
 	/* 
 	 * check LMDB
-	 * we expect a JSON-encoded string containing a formatted address
+	 * we expect a string which contains a JSON object.
 	 */
 
 	source = "lmdb";
 	if (db_get(db, geohash, apbuf, sizeof(apbuf)) > 0) {
-		JsonNode *jst;
+		JsonNode *address_obj;
 
-		if ((jst = json_decode(apbuf)) == NULL) {
+		if ((address_obj = json_decode(apbuf)) == NULL) {
 			fprintf(stderr, "Can't decode JSON apbuf [%s]\n", apbuf);
 			json_append_member(obj, "village", json_mkstring("unknown"));
+			json_append_member(obj, "locality", json_mkstring("unknown"));
+			json_append_member(obj, "cc", json_mkstring("??"));
 		} else {
-			json_append_member(obj, "village", jst);
+			static char *elems[] = { "village", "locality", "cc", NULL }, **e;
+			JsonNode *el;
+
+			for (e = &elems[0]; e && *e; e++) {
+				if ((el = json_find_member(address_obj, *e)) != NULL) {
+					if (el->tag == JSON_STRING) {
+						json_append_member(obj, *e, json_mkstring(el->string_));
+					}
+				}
+			}
+
+			json_delete(address_obj);
 		}
 		json_append_member(obj, "s", json_mkstring(source));
 		json_append_member(json, "address", obj);
@@ -261,25 +276,26 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	gettimeofday(&t_start_oc, NULL);
 	st.opencage++;
 
-	if (revgeo_getdata(apikey, lat, lon, addr, rawdata) == true) {
-		JsonNode *jstr;
+	if (revgeo_getdata(apikey, lat, lon, addr, rawdata, locality, cc) == true) {
+		JsonNode *address_obj = json_mkobject();
 		char *js;
 		ap = UB(addr);
 
-		/* Store the JSON-encoded string into LMDB (UTF-8 and all that) */
-		jstr = json_mkstring(ap);
+		/* Store the full address as JSON in LMDB (JSON takes care of UTF-8) */
 
-		if ((js = json_stringify(jstr, NULL)) != NULL) {
+		json_append_member(address_obj, "village",	json_mkstring(ap));
+		json_append_member(address_obj, "locality",	json_mkstring(UB(locality)));
+		json_append_member(address_obj, "cc",		json_mkstring(UB(cc)));
+
+		if ((js = json_stringify(address_obj, NULL)) != NULL) {
+			printf("[[%s]]\n", js);
 			if (db_put(db, geohash, js) != 0) {
 				fprintf(stderr, "Cannot db_put: ");
 				perror("");
 			}
 			free(js);
 		}
-		json_delete(jstr);
-
-		// snprintf(redis_key, sizeof(redis_key), "opencage:%s", geohash);
-		// redis_store(redis_key, UB(rawdata));
+		json_delete(address_obj);
 
 	} else {
 		st.geofail++;
@@ -295,8 +311,10 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	statsd_timing(sd, "response.opencage.duration", (long)opencage_millis);
 #endif
 
-	json_append_member(obj, "village", json_mkstring(ap));
-	json_append_member(obj, "s", json_mkstring(source));
+	json_append_member(obj, "village",	json_mkstring(ap));
+	json_append_member(obj, "locality",	json_mkstring(UB(locality)));
+	json_append_member(obj, "cc",		json_mkstring(UB(cc)));
+	json_append_member(obj, "s",		json_mkstring(source));
 	json_append_member(json, "address", obj);
 	return send_json(connection, json, lat, lon, geohash, source);
 }

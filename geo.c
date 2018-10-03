@@ -46,9 +46,9 @@ static size_t writemem(void *contents, size_t size, size_t nmemb, void *userp)
  * results_array becomes the JSON string of results[]
  */
 
-static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *results_array)
+static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *results_array, UT_string *locality, UT_string *cc)
 {
-	JsonNode *json, *results, *address, *zeroth;
+	JsonNode *json, *results, *address, *zeroth, *ac;
 
 	/*
 	* We are parsing this. I want the formatted in `addr'
@@ -102,6 +102,46 @@ static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *resu
 				utstring_printf(addr, "%s", address->string_);
 			}
 		}
+
+		if ((ac = json_find_member(zeroth, "components")) != NULL) {
+
+			/*
+			 * {
+			 *   "ISO_3166-1_alpha-2": "FR",
+			 *   "_type": "place",
+			 *   "city": "Sablonnières",
+			 *   "country": "France",
+			 *   "country_code": "fr",
+			 *   "county": "Seine-et-Marne",
+			 *   "place": "La Terre Noire",
+			 *   "political_union": "European Union",
+			 *   "postcode": "77510",
+			 *   "state": "Île-de-France"
+			 * }
+			 */
+
+			JsonNode *j;
+
+			if ((j = json_find_member(ac, "country_code")) != NULL) {
+				if (j->tag == JSON_STRING) {
+					char *bp = j->string_;
+					int ch;
+
+					while (*bp) {
+						ch = (islower(*bp)) ? toupper(*bp) : *bp;
+						utstring_printf(cc, "%c", ch);
+						++bp;
+					}
+				}
+			}
+
+			if ((j = json_find_member(ac, "city")) != NULL) {
+				if (j->tag == JSON_STRING) {
+					utstring_printf(locality, "%s", j->string_);
+				}
+			}
+		}
+
 	}
 
 	json_delete(json);
@@ -116,7 +156,7 @@ static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *resu
  * return true if OK, false otherwise
  */
 
-int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata)
+int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
 {
 	static UT_string *url;
 	static UT_string *curl_buf;
@@ -156,7 +196,7 @@ int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_str
 		return (false);
 	}
 
-	if ((rc = opencage_decode(curl_buf, addr, rawdata)) == false) {
+	if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
 		return (false);
 	}
 
@@ -179,12 +219,15 @@ int main()
 {
 	double lat = 49.0156556, lon = 8.3975169;
 	double clat = 48.85833, clon = 3.29513;
-	static UT_string *addr, *rawdata;
+	static UT_string *addr, *rawdata, *locality, *cc;
 
 	char *apikey = getenv("OPENCAGE_APIKEY");
 
 	utstring_renew(addr);
 	utstring_renew(rawdata);
+	utstring_renew(locality);
+	utstring_renew(cc);
+
 
 	if (apikey == NULL) {
 		fprintf(stderr, "OPENCAGE_APIKEY key missing in environment\n");
@@ -193,7 +236,7 @@ int main()
 
 	revgeo_init();
 
-	if (revgeo_getdata(apikey, lat, lon, addr, rawdata)) {
+	if (revgeo_getdata(apikey, lat, lon, addr, rawdata, locality, cc)) {
 		printf("%s\n", UB(addr));
 	} else {
 		printf("Cannot get revgeo\n");
@@ -201,7 +244,7 @@ int main()
 
 	utstring_renew(addr);
 
-	if (revgeo_getdata(apikey, clat, clon, addr, rawdata)) {
+	if (revgeo_getdata(apikey, clat, clon, addr, rawdata, locality, cc)) {
 		printf("%s\n", UB(addr));
 		{
 			FILE *fp = fopen("1.1", "w");
