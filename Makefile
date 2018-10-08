@@ -12,7 +12,7 @@ ifneq ($(origin STATSDHOST), undefined)
 	LDFLAGS += -lstatsdclient
 endif
 
-OBJS = json.o geohash.o geo.o db.o
+OBJS = json.o geohash.o geo.o db.o uptime.o
 
 all: revgeod lmdb-ll-look
 

@@ -37,6 +37,7 @@
 #include "json.h"
 #include "geo.h"
 #include "db.h"
+#include "uptime.h"
 #ifdef STATSD
 # include <statsd/statsd-client.h>
 # define SAMPLE_RATE 1.0
@@ -165,7 +166,7 @@ static int send_json(struct MHD_Connection *conn, JsonNode *json, double lat, do
 static int get_stats(struct MHD_Connection *connection)
 {
 	JsonNode *json = json_mkobject(), *counters = json_mkobject();
-	char *js;
+	char *js, uptimebuf[BUFSIZ];
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
 #ifdef STATSD
@@ -177,8 +178,10 @@ static int get_stats(struct MHD_Connection *connection)
 	json_append_member(counters, "opencage",	json_mknumber(st.opencage));
 	json_append_member(counters, "lmdb",		json_mknumber(st.lmdb));
 
+	uptime(time(0) - st.launchtime, uptimebuf, sizeof(uptimebuf));
 	json_append_member(json, "stats",	counters);
 	json_append_member(json, "uptime",	json_mknumber(time(0) - st.launchtime));
+	json_append_member(json, "uptime_s",	json_mkstring(uptimebuf));
 	json_append_member(json, "tst",		json_mknumber(time(0)));
 
 	if ((js = json_stringify(json, NULL)) != NULL) {
