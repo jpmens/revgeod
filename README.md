@@ -24,3 +24,9 @@ opencage_millis 4304.350000
 
 Thanks to [this post](https://blogs.kolabnow.com/2018/06/07/a-short-guide-to-lmdb) I learn that
 > in order to run LMDB under Valgrind, the maximum mapsize must be smaller than half your available ram.
+
+
+## requirements
+
+* [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
+* [statsd-c-client](https://github.com/romanbsd/statsd-c-client)
