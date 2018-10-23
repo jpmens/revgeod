@@ -6,6 +6,8 @@ lat=48.85593
 lon=2.29431
 url="http://127.0.0.1:8865/rev?lat=${lat}&lon=${lon}"
 
+echo $url
+
 json=$(curl  -sS $url)
 
 str=$(echo "$json" | jq -r .address.village)
