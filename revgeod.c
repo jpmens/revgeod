@@ -44,8 +44,6 @@
 statsd_link *sd;
 #endif
 
-#define LMDB_DATABASE		"data/geocache/"
-#define LISTEN_PORT		"8865"
 #define GEOHASH_PRECISION	8
 
 #ifdef MHD_HTTP_NOT_ACCEPTABLE

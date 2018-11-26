@@ -7,6 +7,8 @@ ifneq ($(origin STATSDHOST), undefined)
 	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
 	LDFLAGS += -lstatsdclient
 endif
+CFLAGS += -DLMDB_DATABASE=\"$(LMDB_DATABASE)\"
+CFLAGS += -DLISTEN_PORT=\"$(LISTEN_PORT)\"
 
 OBJS = json.o geohash.o geo.o db.o uptime.o
 
