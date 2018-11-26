@@ -1,5 +1,7 @@
 # definitions you need
 
+# leave undefined if you don't want to use statsd
+STATSDHOST=		"127.0.0.1"
 LMDB_DATABASE=           "data/geocache/"
 LISTEN_PORT=		"8865"
 LIBS = 		# -lgnutls

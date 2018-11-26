@@ -1,8 +1,4 @@
-
 include config.mk
-
-# leave undefined if you don't want to use statsd
-STATSDHOST="127.0.0.1"
 
 CFLAGS= -Wall -Werror
 LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
