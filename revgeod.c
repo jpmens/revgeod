@@ -45,7 +45,7 @@ statsd_link *sd;
 #endif
 
 #define LMDB_DATABASE		"data/geocache/"
-#define S_PORT			"8865"
+#define LISTEN_PORT		"8865"
 #define GEOHASH_PRECISION	8
 
 #ifdef MHD_HTTP_NOT_ACCEPTABLE
@@ -369,7 +369,7 @@ int main()
 	if ((s_ip = getenv("REVGEO_IP")) == NULL)
 		s_ip = "127.0.0.1";
 	if ((s_port = getenv("REVGEO_PORT")) == NULL)
-		s_port = S_PORT;
+		s_port = LISTEN_PORT;
 
 	port = atoi(s_port);
 	

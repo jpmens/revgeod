@@ -1,3 +1,5 @@
 # definitions you need
 
-LIBS = 
+LMDB_DATABASE=           "data/geocache/"
+LISTEN_PORT=		"8865"
+LIBS = 		# -lgnutls
