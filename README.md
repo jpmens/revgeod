@@ -75,6 +75,14 @@ yum install lmdb
 apt-get install  liblmdb-dev lmdb-utils
 ```
 
+### macos
+
+```
+brew install jpmens/brew/revgeod
+```
+
+This is documented [here](https://github.com/jpmens/homebrew-brew).
+
 
 ## blurbs
 
@@ -98,7 +106,7 @@ Thanks to [this post](https://blogs.kolabnow.com/2018/06/07/a-short-guide-to-lmd
 ## requirements
 
 * [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-* [statsd-c-client](https://github.com/romanbsd/statsd-c-client)
+* [statsd-c-client](https://github.com/romanbsd/statsd-c-client) (optional)
 
 ## author
 
