@@ -167,6 +167,7 @@ static int get_stats(struct MHD_Connection *connection)
 	char *js, uptimebuf[BUFSIZ];
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
+	json_append_member(counters, "_version",	json_mkstring(GIT_VERSION));
 #ifdef STATSD
 	json_append_member(counters, "_statsd",		json_mkbool(true));
 #endif
