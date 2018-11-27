@@ -148,36 +148,12 @@ static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *resu
 	return (true);
 }
 
-/*
- * apikey: API key for OpenCage
- * lat, lon: 
- * addr: target for the parsed address
- * rawdata: an allocated UT_string which is cleared internally; will contain response from OpenCage
- * return true if OK, false otherwise
- */
-
-int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
+bool http_get(char *url, UT_string *curl_buf)
 {
-	static UT_string *url;
-	static UT_string *curl_buf;
 	long http_code;
 	CURLcode res;
-	int rc;
 
-	if (lat == 0.0L && lon == 0.0L) {
-		utstring_printf(addr, "Unknown (%lf,%lf)", lat, lon);
-		return (false);
-	}
-	
-	utstring_renew(url);
-	utstring_renew(curl_buf);
-	utstring_clear(rawdata);
-
-	utstring_printf(url, OPENCAGE_URL, lat, lon, apikey);
-
-	// printf("--------------- %s\n", UB(url));
-
-	curl_easy_setopt(curl, CURLOPT_URL, UB(url));
+	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "revgeod-ng/1.0");
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
@@ -195,12 +171,43 @@ int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_str
 		              curl_easy_strerror(res), http_code);
 		return (false);
 	}
+	return (true);
+}
 
-	if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
+/*
+ * apikey: API key for OpenCage
+ * lat, lon: 
+ * addr: target for the parsed address
+ * rawdata: an allocated UT_string which is cleared internally; will contain response from OpenCage
+ * return true if OK, false otherwise
+ */
+
+int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
+{
+	static UT_string *url;
+	static UT_string *curl_buf;
+	int rc;
+	bool bf;
+
+	if (lat == 0.0L && lon == 0.0L) {
+		utstring_printf(addr, "Unknown (%lf,%lf)", lat, lon);
 		return (false);
 	}
+	
+	utstring_renew(url);
+	utstring_renew(curl_buf);
+	utstring_clear(rawdata);
 
-	return (true);
+	utstring_printf(url, OPENCAGE_URL, lat, lon, apikey);
+
+	bf = http_get(UB(url), curl_buf);
+	if (bf == true) {
+		if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
+			bf = false;
+		}
+	}
+
+	return (bf);
 }
 
 void revgeo_init()

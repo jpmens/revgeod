@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/time.h>
+#include <getopt.h>
 #define MHD_PLATFORM_H
 #include <microhttpd.h>
 #include "geohash.h"
@@ -43,6 +44,7 @@
 # define SAMPLE_RATE 1.0
 statsd_link *sd;
 #endif
+#include "version.h"
 
 #define GEOHASH_PRECISION	8
 
@@ -167,7 +169,7 @@ static int get_stats(struct MHD_Connection *connection)
 	char *js, uptimebuf[BUFSIZ];
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
-	json_append_member(counters, "_version",	json_mkstring(GIT_VERSION));
+	json_append_member(counters, "_version",	json_mkstring(VERSION));
 #ifdef STATSD
 	json_append_member(counters, "_statsd",		json_mkbool(true));
 #endif
@@ -350,28 +352,97 @@ int handle_connection(void *cls, struct MHD_Connection *connection,
 	return send_page(connection, "four-oh-four", MHD_HTTP_NOT_FOUND);
 }
 
-int main()
+int dump_all()
+{
+#if 0
+	struct db *db;
+
+	if ((db = db_open(LMDB_DATABASE, NULL, false)) == NULL) {
+		perror(LMDB_DATABASE);
+		return (1);
+	}
+
+	db_close(db);
+#endif
+	db_dump(LMDB_DATABASE, NULL);
+	return (0);
+}
+
+int my_getstats(char *ip, short port)
+{
+	static UT_string *url, *curl_buf;
+	int rc = 0;
+
+	utstring_renew(url);
+	utstring_renew(curl_buf);
+
+	utstring_printf(url, "http://%s:%d/stats", ip, port);
+
+	revgeo_init();
+
+	if (http_get(UB(url), curl_buf) == false) {
+		fprintf(stderr, "Cannot GET %s\n", UB(url));
+		rc = 1;
+		goto out;
+	} else {
+		JsonNode *json;
+
+		if ((json = json_decode(UB(curl_buf))) != NULL) {
+			char *js = json_stringify(json, "   ");
+			if (js) {
+				printf("%s\n", js);
+				free(js);
+				rc = 0;
+			}
+			json_delete(json);
+		}
+	}
+
+   out:
+	revgeo_free();
+
+	return (rc);
+}
+
+int main(int argc, char **argv)
 {
 	struct sockaddr_in sad;
 	char *s_ip, *s_port;
 	unsigned short port;
+	int ch;
 
 #ifdef STATSD
 	sd = statsd_init_with_namespace(STATSD, 8125, "revgeo");
 #endif
+
+	if ((s_ip = getenv("REVGEO_IP")) == NULL)
+		s_ip = "127.0.0.1";
+	if ((s_port = getenv("REVGEO_PORT")) == NULL)
+		s_port = LISTEN_PORT;
+	port = atoi(s_port);
+	
+	while ((ch = getopt(argc, argv, "dsv")) != EOF) {
+		switch (ch) {
+			case 'd':
+				return dump_all();
+				break; /* NOTREACHED */
+			case 's':
+				return my_getstats(s_ip, port);
+				break; /* NOTREACHED */
+			case 'v':
+				printf("revgeod %s\n", VERSION);
+				exit(0);
+			default:
+				fprintf(stderr, "Usage: %s [-d] [-s] [-v]\n", *argv);
+				exit(2);
+		}
+	}
 
 	if ((apikey = getenv("OPENCAGE_APIKEY")) == NULL) {
 		fprintf(stderr, "OPENCAGE_APIKEY is missing in environment\n");
 		exit(1);
 	}
 
-	if ((s_ip = getenv("REVGEO_IP")) == NULL)
-		s_ip = "127.0.0.1";
-	if ((s_port = getenv("REVGEO_PORT")) == NULL)
-		s_port = LISTEN_PORT;
-
-	port = atoi(s_port);
-	
 
 	memset(&sad, 0, sizeof (struct sockaddr_in));
 	sad.sin_family = AF_INET;

@@ -60,6 +60,14 @@ _revgeod_ provides statistics on its `/stats` endpoint:
 }
 ```
 
+## options
+
+The following command-line switches are supported:
+
+* `-d`: dump content of database (all keys/values) to stdout
+* `-s`: attempt to connect to _revgeod_ to obtain and print statistics
+* `-v`: show version and exit
+
 
 ## requirements
 
