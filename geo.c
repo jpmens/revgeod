@@ -154,7 +154,7 @@ bool http_get(char *url, UT_string *curl_buf)
 	CURLcode res;
 
 	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, "revgeod-ng/1.0");
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 2000L);

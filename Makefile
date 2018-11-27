@@ -17,6 +17,7 @@ all: revgeod lmdb-ll-look
 revgeod: revgeod.c $(OBJS) Makefile version.h
 	$(CC) $(CFLAGS) -o revgeod revgeod.c $(OBJS) $(LDFLAGS)
 
+geo.o: geo.c json.h version.h
 
 lmdb-ll-look: lmdb-ll-look.c geohash.o json.o db.o
 	$(CC) $(CFLAGS) -o lmdb-ll-look lmdb-ll-look.c geohash.o json.o db.o -llmdb
