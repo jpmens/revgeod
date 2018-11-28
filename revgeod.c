@@ -407,7 +407,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in sad;
 	char *s_ip, *s_port;
 	unsigned short port;
-	bool query;
+	bool query = false;
 	int ch;
 
 #ifdef STATSD
