@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <getopt.h>
 #define MHD_PLATFORM_H
 #include <microhttpd.h>
@@ -167,6 +168,7 @@ static int get_stats(struct MHD_Connection *connection)
 {
 	JsonNode *json = json_mkobject(), *counters = json_mkobject();
 	char *js, uptimebuf[BUFSIZ];
+	struct stat sbuf;
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
 	json_append_member(counters, "_version",	json_mkstring(VERSION));
@@ -184,6 +186,12 @@ static int get_stats(struct MHD_Connection *connection)
 	json_append_member(json, "uptime",	json_mknumber(time(0) - st.launchtime));
 	json_append_member(json, "uptime_s",	json_mkstring(uptimebuf));
 	json_append_member(json, "tst",		json_mknumber(time(0)));
+	json_append_member(json, "db_path",	json_mkstring(db_getpath(db)));
+	json_append_member(json, "db_entries",	json_mknumber(db_numentries(db)));
+
+	if (stat(LMDB_DATABASE"/data.mdb", &sbuf) == 0) {
+		json_append_member(json, "db_size",	json_mknumber(sbuf.st_size));
+	}
 
 	if ((js = json_stringify(json, NULL)) != NULL) {
 		int ret = send_content(connection, js, "application/json", MHD_HTTP_OK);
@@ -354,16 +362,6 @@ int handle_connection(void *cls, struct MHD_Connection *connection,
 
 int dump_all()
 {
-#if 0
-	struct db *db;
-
-	if ((db = db_open(LMDB_DATABASE, NULL, false)) == NULL) {
-		perror(LMDB_DATABASE);
-		return (1);
-	}
-
-	db_close(db);
-#endif
 	db_dump(LMDB_DATABASE, NULL);
 	return (0);
 }
@@ -409,6 +407,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in sad;
 	char *s_ip, *s_port;
 	unsigned short port;
+	bool query;
 	int ch;
 
 #ifdef STATSD
@@ -421,11 +420,14 @@ int main(int argc, char **argv)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
 	
-	while ((ch = getopt(argc, argv, "dsv")) != EOF) {
+	while ((ch = getopt(argc, argv, "dqsv")) != EOF) {
 		switch (ch) {
 			case 'd':
 				return dump_all();
 				break; /* NOTREACHED */
+			case 'q':
+				query = true;
+				break;
 			case 's':
 				return my_getstats(s_ip, port);
 				break; /* NOTREACHED */
@@ -433,9 +435,34 @@ int main(int argc, char **argv)
 				printf("revgeod %s\n", VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "Usage: %s [-d] [-s] [-v]\n", *argv);
+				fprintf(stderr, "Usage: %s [-d] [-q] [-s] [-v]\n", *argv);
 				exit(2);
 		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (query) {
+		struct db *db;
+
+		if ((db = db_open(LMDB_DATABASE, NULL, true)) == NULL) {
+			perror(LMDB_DATABASE);
+			return (1);
+		}
+
+		while (*argv) {
+			char apbuf[8192], *geohash = *argv++;
+
+			if (db_get(db, geohash, apbuf, sizeof(apbuf)) > 0) {
+				printf("%s %s\n", geohash, apbuf);
+			} else {
+				printf("%s not found\n", geohash);
+			}
+		}
+
+		db_close(db);
+		return (0);
 	}
 
 	if ((apikey = getenv("OPENCAGE_APIKEY")) == NULL) {

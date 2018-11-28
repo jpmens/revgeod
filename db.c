@@ -282,6 +282,37 @@ void db_load(char *path, char *lmdbname)
 	db_close(db);
 }
 
+/*
+ * Return number of entries in database at `db'
+ */
+
+size_t db_numentries(struct db *db)
+{
+	MDB_stat st;
+
+	assert(db != NULL);
+
+
+	if (mdb_env_stat(db->env, &st) != 0)
+		return -1L;
+
+	return (st.ms_entries);
+}
+
+/*
+ * Return pointer to database path; do not touch, do not free!
+ */
+
+const char *db_getpath(struct db *db)
+{
+	const char *path;
+
+	assert(db != NULL);
+	if (mdb_env_get_path(db->env, &path) != 0)
+		return (NULL);
+	return (path);
+}
+
 #ifdef TESTING
 
 #define DBNAME "t/"

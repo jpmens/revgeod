@@ -37,5 +37,6 @@ int db_put(struct db *, char *ghash, char *payload);
 long db_get(struct db *, char *key, char *buf, long buflen);
 void db_dump(char *path, char *lmdbname);
 void db_load(char *path, char *lmdbname);
-
+size_t db_numentries(struct db *db);
+const char *db_getpath(struct db *db);
 #endif
