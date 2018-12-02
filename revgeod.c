@@ -214,7 +214,9 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	char *geohash, *ap, *source, apbuf[8192];
 	static UT_string *addr, *rawdata, *locality, *cc;
 	struct timeval t_stop_oc, t_start_oc;
+#ifdef STATSD
 	double opencage_millis;
+#endif
 
 	// GET /rev?format=json&lat=48.85833&lon=3.29513&zoom=18&addressdetails=1
 
@@ -315,10 +317,10 @@ static int get_reversegeo(struct MHD_Connection *connection)
 
 	gettimeofday(&t_stop_oc, NULL);
 
+#ifdef STATSD
 	opencage_millis = (double)(t_stop_oc.tv_usec - t_start_oc.tv_usec) / 1000
 			+ (double)(t_stop_oc.tv_sec - t_start_oc.tv_sec) * 1000;
 
-#ifdef STATSD
 	printf("opencage_millis %f\n", opencage_millis);
 	statsd_timing(sd, "response.opencage.duration", (long)opencage_millis);
 #endif
@@ -415,7 +417,7 @@ int main(int argc, char **argv)
 #endif
 
 	if ((s_ip = getenv("REVGEO_IP")) == NULL)
-		s_ip = "127.0.0.1";
+		s_ip = LISTEN_HOST;
 	if ((s_port = getenv("REVGEO_PORT")) == NULL)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
