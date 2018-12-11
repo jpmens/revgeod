@@ -5,7 +5,7 @@ This is a small Python class (tested with Python2, Python3) which will query [re
 
 ### Ansible
 
-During a training at the end of December, I was convinced to rewrite an example lookup plugin for a training class because the example I had was unrealistic. So I did so and used _revgeo_ as an example.
+During a training at the end of December, I was talked into rewriting an example lookup plugin for a training class because the example I had was unrealistic. So I did so and used _revgeo_ as an example.
 
 The Ansible playbook I use for testing the plugin:
 
