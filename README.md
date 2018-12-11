@@ -45,18 +45,21 @@ _revgeod_ provides statistics on its `/stats` endpoint:
 
 ```json
 {
-  "stats": {
-    "_whoami": "revgeod.c",
-    "_statsd": true,
-    "stats": 11,
-    "requests": 760,
-    "geocode_failed": 0,
-    "opencage": 538,
-    "lmdb": 222
-  },
-  "uptime": 1808,
-  "uptime_s": "0 days, 0 hours, 30 mins",
-  "tst": 1540300536
+   "stats": {
+      "_whoami": "revgeod.c",
+      "_version": "0.1.8",
+      "stats": 8,
+      "requests": 13647,
+      "geocode_failed": 9,
+      "opencage": 13624,
+      "lmdb": 23
+   },
+   "uptime": 381258,
+   "uptime_s": "4 days, 9 hours, 54 mins",
+   "tst": 1544555424,
+   "db_path": "/usr/local/var/revgeod/geocache/",
+   "db_entries": 43756,
+   "db_size": 7532544
 }
 ```
 
