@@ -1,11 +1,13 @@
 ## Python _revgeod_
 
-This is a small Python class (tested with Python2, Python3) which will query _revgeod_, by default on `127.0.0.1:8865`.
+This is a small Python class (tested with Python2, Python3) which will query [revgeod](https://github.com/jpmens/revgeod).
 
 
 ### Ansible
 
-During the end of December, I was convinced to rewrite an example lookup plugin for a training class and I used _revgeo_ as an example. The Ansible playbook I use for testing the plugin:
+During a training at the end of December, I was convinced to rewrite an example lookup plugin for a training class because the example I had was unrealistic. So I did so and used _revgeo_ as an example.
+
+The Ansible playbook I use for testing the plugin:
 
 ```yaml
 - hosts: localhost
