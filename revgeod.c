@@ -362,9 +362,35 @@ int handle_connection(void *cls, struct MHD_Connection *connection,
 	return send_page(connection, "four-oh-four", MHD_HTTP_NOT_FOUND);
 }
 
-int dump_all()
+int printer_d(int keylen, char *key, int datalen, char *data)
 {
-	db_dump(LMDB_DATABASE, NULL);
+	/* -1 because data _is_ 0-terminated */
+	printf("%*.*s %*.*s\n",
+		(int)keylen, (int)keylen, (char *)key,
+		(int)datalen - 1, (int)datalen - 1, (char *)data);
+	return (0);
+}
+
+int printer_D(int keylen, char *key, int datalen, char *data)
+{
+	/* WARNING: `key' is not 0-terminated */
+	char geohash[12];
+	int glen = (keylen > sizeof(geohash) - 1) ? sizeof(geohash) - 1 : keylen;
+	GeoCoord g;
+
+	memcpy(geohash, key, glen);
+	geohash[glen] = 0;
+
+	g = geohash_decode(geohash);
+
+	printf("%2lf,%2lf ", g.latitude, g.longitude);
+
+	return (printer_d(keylen, key, datalen, data));
+}
+
+int dump_all(bool bf)
+{
+	db_list(LMDB_DATABASE, NULL, (bf) ? printer_D : printer_d);
 	return (0);
 }
 
@@ -422,10 +448,11 @@ int main(int argc, char **argv)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
 	
-	while ((ch = getopt(argc, argv, "dqsv")) != EOF) {
+	while ((ch = getopt(argc, argv, "dDqsv")) != EOF) {
 		switch (ch) {
+			case 'D':
 			case 'd':
-				return dump_all();
+				return dump_all(ch == 'D');
 				break; /* NOTREACHED */
 			case 'q':
 				query = true;
@@ -437,7 +464,7 @@ int main(int argc, char **argv)
 				printf("revgeod %s\n", VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "Usage: %s [-d] [-q] [-s] [-v]\n", *argv);
+				fprintf(stderr, "Usage: %s [-dD] [-q] [-s] [-v]\n", *argv);
 				exit(2);
 		}
 	}

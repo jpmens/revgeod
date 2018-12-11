@@ -68,6 +68,7 @@ _revgeod_ provides statistics on its `/stats` endpoint:
 The following command-line switches are supported:
 
 * `-d`: dump content of database (all keys/values) to stdout
+* `-D`: dump content of database (all keys/values) to stdout, lines prefixed by lat,lon
 * `-q`: query individual geohashes
 * `-s`: attempt to connect to _revgeod_ to obtain and print statistics
 * `-v`: show version and exit

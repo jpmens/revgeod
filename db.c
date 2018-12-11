@@ -253,6 +253,43 @@ void db_dump(char *path, char *lmdbname)
 	db_close(db);
 }
 
+void db_list(char *path, char *lmdbname, int (*func)(int keylen, char *key, int datlen, char *data))
+{
+	struct db *db;
+	MDB_val key, data;
+	MDB_txn *txn;
+	MDB_cursor *cursor;
+	int rc, stop;
+
+	if ((db = db_open(path, lmdbname, true)) == NULL) {
+		fprintf(stderr, "Cannot open lmdb/%s at %s\n",
+			lmdbname ? lmdbname : "NULL", path);
+		return;
+	}
+
+	key.mv_size = 0;
+	key.mv_data = NULL;
+
+	rc = mdb_txn_begin(db->env, NULL, MDB_RDONLY, &txn);
+	if (rc) {
+		syslog(LOG_ERR, "db_dump: mdb_txn_begin: (%d) %s", rc, mdb_strerror(rc));
+		db_close(db);
+		return;
+	}
+
+	rc = mdb_cursor_open(txn, db->dbi, &cursor);
+
+	while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
+		stop = func(key.mv_size, key.mv_data, data.mv_size, data.mv_data);
+		if (stop == 1) {
+			break;
+		}
+	}
+	mdb_cursor_close(cursor);
+	mdb_txn_commit(txn);
+	db_close(db);
+}
+
 void db_load(char *path, char *lmdbname)
 {
 	struct db *db;
