@@ -435,7 +435,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in sad;
 	char *s_ip, *s_port;
 	unsigned short port;
-	bool query = false;
+	bool query = false, kill = false;
 	int ch;
 
 #ifdef STATSD
@@ -448,12 +448,15 @@ int main(int argc, char **argv)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
 	
-	while ((ch = getopt(argc, argv, "dDqsv")) != EOF) {
+	while ((ch = getopt(argc, argv, "dDqsvk")) != EOF) {
 		switch (ch) {
 			case 'D':
 			case 'd':
 				return dump_all(ch == 'D');
 				break; /* NOTREACHED */
+			case 'k':
+				kill = true;
+				break;
 			case 'q':
 				query = true;
 				break;
@@ -464,7 +467,7 @@ int main(int argc, char **argv)
 				printf("revgeod %s\n", VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "Usage: %s [-dD] [-q] [-s] [-v]\n", *argv);
+				fprintf(stderr, "Usage: %s [-dD] [-k] [-q] [-s] [-v]\n", *argv);
 				exit(2);
 		}
 	}
@@ -472,10 +475,11 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (query) {
+	if (query || kill) {
 		struct db *db;
+		bool rdonly = !kill;
 
-		if ((db = db_open(LMDB_DATABASE, NULL, true)) == NULL) {
+		if ((db = db_open(LMDB_DATABASE, NULL, rdonly)) == NULL) {
 			perror(LMDB_DATABASE);
 			return (1);
 		}
@@ -484,6 +488,11 @@ int main(int argc, char **argv)
 			char apbuf[8192], *geohash = *argv++;
 
 			if (db_get(db, geohash, apbuf, sizeof(apbuf)) > 0) {
+				if (kill) {
+					int rc = db_del(db, geohash);
+
+					printf("%s ", !rc ? "DELETED" : "ERROR");
+				}
 				printf("%s %s\n", geohash, apbuf);
 			} else {
 				printf("%s not found\n", geohash);
