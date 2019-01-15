@@ -5,6 +5,7 @@ LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
 ifneq ($(origin STATSDHOST), undefined)
 	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
+	CFLAGS += -I$(INC)
 	LDFLAGS += -lstatsdclient
 endif
 CFLAGS += -DLMDB_DATABASE=\"$(LMDB_DATABASE)\"

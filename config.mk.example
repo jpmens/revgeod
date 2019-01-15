@@ -5,4 +5,5 @@ STATSDHOST=		"127.0.0.1"
 LMDB_DATABASE=           "data/geocache/"
 LISTEN_HOST=            "127.0.0.1"
 LISTEN_PORT=		"8865"
+# INC = 		# ../stats-d-client/
 LIBS = 		# -lgnutls
