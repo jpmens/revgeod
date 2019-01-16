@@ -1,6 +1,6 @@
 /*
  * revgeod
- * Copyright (C) 2018 Jan-Piet Mens <jp@mens.de>
+ * Copyright (C) 2018-2019 Jan-Piet Mens <jp@mens.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
