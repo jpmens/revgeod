@@ -5,9 +5,10 @@ LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
 ifneq ($(origin STATSDHOST), undefined)
 	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
-	CFLAGS += -I$(INC)
+	CFLAGS += $(INC)
 	LDFLAGS += -lstatsdclient
 endif
+
 CFLAGS += -DLMDB_DATABASE=\"$(LMDB_DATABASE)\"
 CFLAGS += -DLISTEN_HOST=\"$(LISTEN_HOST)\"
 CFLAGS += -DLISTEN_PORT=\"$(LISTEN_PORT)\"
@@ -17,6 +18,7 @@ OBJS = json.o geohash.o geo.o db.o uptime.o
 all: revgeod lmdb-ll-look
 
 revgeod: revgeod.c $(OBJS) Makefile version.h config.mk
+	echo db=$(LMDB_DATABASE)
 	$(CC) $(CFLAGS) -o revgeod revgeod.c $(OBJS) $(LDFLAGS)
 
 geo.o: geo.c json.h version.h
