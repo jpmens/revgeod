@@ -109,7 +109,7 @@ apt-get install  liblmdb-dev lmdb-utils
 brew install jpmens/brew/revgeod
 ```
 
-This is documented [here](https://github.com/jpmens/homebrew-brew), and the homebrew version is typically updated frequently.
+This is documented [here](https://github.com/jpmens/homebrew-brew), and the homebrew version is typically kept in sync with this version.
 
 
 ## blurbs
