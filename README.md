@@ -86,7 +86,7 @@ The following command-line switches are supported:
 * `-D`: dump content of database (all keys/values) to stdout, lines prefixed by lat,lon
 * `-k`: kill (i.e. delete) individual geohashes
 * `-q`: query individual geohashes
-* `-s`: connect to _revgeod_ on its compiled-in address to obtain and print statistics
+* `-s`: connect to _revgeod_ on its compiled-in address/port to obtain and print statistics
 * `-v`: show version and exit
 
 ## requirements
