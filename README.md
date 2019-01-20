@@ -38,6 +38,17 @@ A second query for the same location would respond with `lmdb` instead of `openc
 {"address":{"village":"4 r du Général Lambert, 75015 Paris, France","locality":"Paris","cc":"FR","s":"lmdb"}}
 ```
 
+## query params
+
+The following query parameters are mandatory:
+
+- `lat=` specify the latitude as a decimal
+- `lon=` specify the longitude as a decimal
+
+The following optional query parameters are supported:
+
+- `app=` specifies an "application" for which query statistics should be collected (see _statistics_ below).
+
 ## statistics
 
 _revgeod_ provides statistics on its `/stats` endpoint:
@@ -52,6 +63,11 @@ _revgeod_ provides statistics on its `/stats` endpoint:
       "geocode_failed": 9,
       "opencage": 13624,
       "lmdb": 23
+   },
+   "apps": {
+      "recorder": 13,
+      "clitest": 5,
+      "jp0": 2
    },
    "uptime": 381258,
    "uptime_s": "4 days, 9 hours, 54 mins",
@@ -119,6 +135,11 @@ Thanks to [this post](https://blogs.kolabnow.com/2018/06/07/a-short-guide-to-lmd
 
 * [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
 * [statsd-c-client](https://github.com/romanbsd/statsd-c-client) (optional)
+
+## credits
+
+* [uthash](https://troydhanson.github.io/uthash/), by Troy D. Hanson
+* [utstring](https://troydhanson.github.io/uthash/utstring.html), by Troy D. Hanson
 
 ## author
 

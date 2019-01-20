@@ -40,6 +40,7 @@
 #include "geo.h"
 #include "db.h"
 #include "uptime.h"
+#include "uthash.h"
 #ifdef STATSD
 # include <statsd/statsd-client.h>
 # define SAMPLE_RATE 1.0
@@ -59,6 +60,14 @@ static char *apikey;
 static struct db *db;
 struct MHD_Daemon *mhdaemon;
 
+struct appdata {
+	char *appname;
+	unsigned long queries;
+	UT_hash_handle hh_appname;
+
+};
+struct appdata *appcache = NULL;
+
 struct statistics {
 	time_t		launchtime;
 	unsigned long	requests;		/* total requests */
@@ -67,6 +76,14 @@ struct statistics {
 	unsigned long	lmdb;
 	unsigned long	stats;			/* How often self called */
 } st;
+
+struct appdata *find_app(const char *appname)
+{
+        struct appdata *app = NULL;
+
+        HASH_FIND(hh_appname, appcache, appname, strlen(appname), app);
+        return (app);
+}
 
 static void catcher(int sig)
 {
@@ -166,9 +183,10 @@ static int send_json(struct MHD_Connection *conn, JsonNode *json, double lat, do
 
 static int get_stats(struct MHD_Connection *connection)
 {
-	JsonNode *json = json_mkobject(), *counters = json_mkobject();
+	JsonNode *json = json_mkobject(), *counters = json_mkobject(), *apps = json_mkobject();
 	char *js, uptimebuf[BUFSIZ];
 	struct stat sbuf;
+	struct appdata *a = NULL, *tmp;
 
 	json_append_member(counters, "_whoami",		json_mkstring(__FILE__));
 	json_append_member(counters, "_version",	json_mkstring(VERSION));
@@ -181,8 +199,13 @@ static int get_stats(struct MHD_Connection *connection)
 	json_append_member(counters, "opencage",	json_mknumber(st.opencage));
 	json_append_member(counters, "lmdb",		json_mknumber(st.lmdb));
 
+	HASH_ITER(hh_appname, appcache, a, tmp) {
+		json_append_member(apps, a->appname,	json_mknumber(a->queries));
+	}
+
 	uptime(time(0) - st.launchtime, uptimebuf, sizeof(uptimebuf));
 	json_append_member(json, "stats",	counters);
+	json_append_member(json, "apps",	apps);
 	json_append_member(json, "uptime",	json_mknumber(time(0) - st.launchtime));
 	json_append_member(json, "uptime_s",	json_mkstring(uptimebuf));
 	json_append_member(json, "tst",		json_mknumber(time(0)));
@@ -209,11 +232,12 @@ static int get_stats(struct MHD_Connection *connection)
 static int get_reversegeo(struct MHD_Connection *connection)
 {
 	double lat, lon;
-	const char *s_lat, *s_lon;
+	const char *s_lat, *s_lon, *s_app;
 	JsonNode *json, *obj;
 	char *geohash, *ap, *source, apbuf[8192];
 	static UT_string *addr, *rawdata, *locality, *cc;
 	struct timeval t_stop_oc, t_start_oc;
+	struct appdata *app = NULL;
 #ifdef STATSD
 	double opencage_millis;
 #endif
@@ -224,6 +248,25 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	statsd_inc(sd, "queries.incoming", SAMPLE_RATE);
 #endif
 	st.requests++;
+
+
+	/*
+	 * Were we given an application name? Then find it in the hash list and
+	 * increment its query counter.
+	 */
+
+	s_app = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "app");
+	if (s_app && *s_app) {
+		if ((app = find_app(s_app)) == NULL) {
+			app = malloc(sizeof(struct appdata));
+			app->appname = strdup(s_app);
+			app->queries = 1UL;
+			HASH_ADD_KEYPTR(hh_appname, appcache, app->appname, strlen(app->appname), app);
+		} else {
+			app->queries++;
+		}
+	}
+
 
 	s_lat = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "lat");
 	s_lon = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "lon");
