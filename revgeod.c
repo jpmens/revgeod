@@ -290,7 +290,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 
 	ap = "unknown address";
 
-	/* 
+	/*
 	 * check LMDB
 	 * we expect a string which contains a JSON object.
 	 */
@@ -324,7 +324,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 		return send_json(connection, json, lat, lon, geohash, source);
 	}
 
-	/* 
+	/*
 	 * We haven't found entry in our database, so go out and obtain the
 	 * reverse geo-encoding and store it here in LMDB.
 	 */
@@ -394,7 +394,7 @@ int handle_connection(void *cls, struct MHD_Connection *connection,
 	}
 
 	// n = MHD_get_connection_values(connection, MHD_GET_ARGUMENT_KIND, jp_queryp, NULL);
-	
+
 	if (strcmp(url, "/rev") == 0) {
 		return get_reversegeo(connection);
 	}
@@ -490,7 +490,7 @@ int main(int argc, char **argv)
 	if ((s_port = getenv("REVGEO_PORT")) == NULL)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
-	
+
 	while ((ch = getopt(argc, argv, "dDqsvk")) != EOF) {
 		switch (ch) {
 			case 'D':
