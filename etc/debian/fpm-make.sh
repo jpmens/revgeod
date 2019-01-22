@@ -37,7 +37,7 @@ fpm -s dir \
         -d "libcurl3" \
         -d "liblmdb0" \
         -d "libmicrohttpd12" \
-	--config-files usr/local/etc/revgeod \
+	--config-files usr/local/etc/default/revgeod \
         usr var 
 
 echo "${debfile}" > package.name
