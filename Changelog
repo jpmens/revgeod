@@ -1,3 +1,6 @@
 
+2019-01-22 version 0.2.3
+- NEW: packaging for Debian (fpm)
+
 2019-01-20 version 0.2.2
 - NEW: collect per/app query statistics (#2)
