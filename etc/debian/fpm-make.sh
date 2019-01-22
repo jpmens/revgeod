@@ -36,7 +36,7 @@ fpm -s dir \
         -p ${debfile} \
         -d "libcurl3" \
         -d "liblmdb0" \
-        -d "libmicrohttpd10" \
+        -d "libmicrohttpd12" \
         usr var 
 
 echo "${debfile}" > package.name
