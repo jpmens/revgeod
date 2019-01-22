@@ -36,4 +36,8 @@ clobber: clean
 install: revgeod
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/sbin
 	mkdir -p $(DESTDIR)/var/local/revgeod
-	install -m 0755 revgeod $(DESTDIR)$(INSTALLDIR)/sbin
+	chown daemon $(DESTDIR)/var/local/revgeod
+	chmod 755 $(DESTDIR)/var/local/revgeod
+	install -m 755 revgeod $(DESTDIR)$(INSTALLDIR)/sbin/revgeod
+	install -m 755 etc/revgeod.sh $(DESTDIR)$(INSTALLDIR)/sbin/revgeod.sh
+	install -o daemon -m 640 etc/revgeod.default $(DESTDIR)$(INSTALLDIR)/etc/default/revgeod
