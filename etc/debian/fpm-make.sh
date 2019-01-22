@@ -11,7 +11,7 @@ make install DESTDIR=$tempdir
 
 name="revgeod"
 # add -0 to indicate "not in Debian" as per Roger's suggestion
-version="$(awk '{print $NF;}' version.h | sed -e 's/"//g' )-0-deb$(cat /etc/debian_version)"
+version="$(awk 'NR==1 {print $NF;}' version.h | sed -e 's/"//g' )-0-deb$(cat /etc/debian_version)"
 arch=$(uname -m)
 
 case $arch in
