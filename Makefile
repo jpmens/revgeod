@@ -3,6 +3,8 @@ include config.mk
 CFLAGS= -Wall -Werror
 LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
+INSTALLDIR = /usr/local
+
 ifneq ($(origin STATSDHOST), undefined)
 	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
 	CFLAGS += $(INC)
@@ -30,3 +32,8 @@ clean:
 
 clobber: clean
 	rm -f revgeod lmdb-ll-look
+
+install: revgeod
+	mkdir -p $(DESTDIR)$(INSTALLDIR)/sbin
+	mkdir -p $(DESTDIR)/var/local/revgeod
+	install -m 0755 revgeod $(DESTDIR)$(INSTALLDIR)/sbin
