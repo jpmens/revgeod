@@ -1,14 +1,10 @@
 # Defaults for revgeod
-# sourced by /usr/local/sbin/revgeod.sh
+# sourced by revgeod.service
 # installed at /usr/local/etc/default/revgeod by the maintainer scripts
-
-#
-# This is a POSIX shell fragment
-#
 
 # Additional environment variables which are passed to the daemon
 # Uncomment and define as appropriate
 
-# export OPENCAGE_APIKEY="xxx"
-# export REVGEO_IP=127.0.0.1	# designed to run on loopback without security
-# export REVGEO_PORT=8865
+# OPENCAGE_APIKEY="xxx"
+# REVGEO_IP=127.0.0.1
+# REVGEO_PORT=8865

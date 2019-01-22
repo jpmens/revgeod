@@ -40,4 +40,5 @@ install: revgeod
 	install -m 755 revgeod $(DESTDIR)$(INSTALLDIR)/sbin/revgeod
 	install -m 755 etc/revgeod.sh $(DESTDIR)$(INSTALLDIR)/sbin/revgeod.sh
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/etc/default
+	chmod 755 $(DESTDIR)$(INSTALLDIR)/etc/default
 	install -m 640 etc/revgeod.default $(DESTDIR)$(INSTALLDIR)/etc/default/revgeod

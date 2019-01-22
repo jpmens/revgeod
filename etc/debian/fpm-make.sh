@@ -7,7 +7,7 @@ tempdir=$(mktemp -d /tmp/ot-XXX)
 make install DESTDIR=$tempdir
 
 # install -D README.md $tempdir/usr/share/doc/ot-recorder/README.md
-# install -D etc/ot-recorder.service $tempdir/usr/share/doc/ot-recorder/ot-recorder.service
+install -D etc/revgeod.service $tempdir/usr/share/doc/revgeod/revgeod.service
 
 name="revgeod"
 # add -0 to indicate "not in Debian" as per Roger's suggestion
@@ -38,6 +38,7 @@ fpm -s dir \
         -d "liblmdb0" \
         -d "libmicrohttpd12" \
 	--config-files usr/local/etc/default/revgeod \
+	--post-install etc/debian/postinst \
         usr var 
 
 echo "${debfile}" > package.name

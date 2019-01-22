@@ -1,0 +1,17 @@
+# /etc/systemd/system/revgeod.service
+
+[Unit]
+Description=Revgeod
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=daemon
+WorkingDirectory=/
+EnvironmentFile=/usr/local/etc/default/revgeo
+ExecStartPre=/bin/sleep 2
+ExecStart=/usr/local/sbin/revgeod
+
+[Install]
+WantedBy=multi-user.target
