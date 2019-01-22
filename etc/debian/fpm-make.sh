@@ -6,7 +6,7 @@ tempdir=$(mktemp -d /tmp/ot-XXX)
 
 make install DESTDIR=$tempdir
 
-# install -D README.md $tempdir/usr/share/doc/ot-recorder/README.md
+install -D c-mini-test.sh $tempdir/usr/share/doc/revgeod/c-mini-test.sh
 install -D etc/revgeod.service $tempdir/usr/share/doc/revgeod/revgeod.service
 
 name="revgeod"

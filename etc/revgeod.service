@@ -9,7 +9,7 @@ After=network-online.target
 Type=simple
 User=daemon
 WorkingDirectory=/
-EnvironmentFile=/usr/local/etc/default/revgeo
+EnvironmentFile=/usr/local/etc/default/revgeod
 ExecStartPre=/bin/sleep 2
 ExecStart=/usr/local/sbin/revgeod
 
