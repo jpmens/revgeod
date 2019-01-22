@@ -4,7 +4,7 @@
 # 4 Rue du Général Lambert, 75015 Paris, France
 lat=48.85593
 lon=2.29431
-url="http://127.0.0.1:8865/rev?lat=${lat}&lon=${lon}"
+url="http://127.0.0.1:8865/rev?lat=${lat}&lon=${lon}&app=c-mini-test"
 
 echo $url
 
