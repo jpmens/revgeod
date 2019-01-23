@@ -49,6 +49,7 @@ statsd_link *sd;
 #include "version.h"
 
 #define GEOHASH_PRECISION	8
+#define JSON_SPACE		"    "
 
 #ifdef MHD_HTTP_NOT_ACCEPTABLE
 # define NOT_ACCEPTABLE MHD_HTTP_NOT_ACCEPTABLE
@@ -115,18 +116,19 @@ static void ignore_sigpipe()
 		"Failed to install SIGPIPE handler: %s\n", strerror(errno));
 }
 
+#if 0
 int print_kv(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	printf("%s: %s\n", key, value);
 	return (MHD_YES);
 }
+#endif
 
 static int send_content(struct MHD_Connection *conn, const char *page,
 		const char *content_type, int status_code)
 {
 	int ret;
 	struct MHD_Response *response;
-
 	response = MHD_create_response_from_buffer(strlen(page),
 				(void*) page, MHD_RESPMEM_MUST_COPY);
 	if (!response)
@@ -156,7 +158,7 @@ static int send_json(struct MHD_Connection *conn, JsonNode *json, double lat, do
 
 	fprintf(stderr, "%s %lf,%lf ", geohash, lat, lon);
 
-	if ((js = json_stringify(json, NULL)) == NULL) {
+	if ((js = json_stringify(json, JSON_SPACE)) == NULL) {
 		char *page = "JSON kaputt";
 		resp = MHD_create_response_from_buffer(strlen(page), (void *)page, MHD_RESPMEM_MUST_COPY);
 		status_code = MHD_HTTP_INSUFFICIENT_STORAGE;
@@ -216,7 +218,7 @@ static int get_stats(struct MHD_Connection *connection)
 		json_append_member(json, "db_size",	json_mknumber(sbuf.st_size));
 	}
 
-	if ((js = json_stringify(json, NULL)) != NULL) {
+	if ((js = json_stringify(json, JSON_SPACE)) != NULL) {
 		int ret = send_content(connection, js, "application/json", MHD_HTTP_OK);
 		free(js);
 		json_delete(json);
@@ -344,7 +346,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 		json_append_member(address_obj, "locality",	json_mkstring(UB(locality)));
 		json_append_member(address_obj, "cc",		json_mkstring(UB(cc)));
 
-		if ((js = json_stringify(address_obj, NULL)) != NULL) {
+		if ((js = json_stringify(address_obj, JSON_SPACE)) != NULL) {
 			printf("[[%s]]\n", js);
 			if (db_put(db, geohash, js) != 0) {
 				fprintf(stderr, "Cannot db_put: ");
@@ -376,11 +378,114 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	return send_json(connection, json, lat, lon, geohash, source);
 }
 
+/* Ceci est very memory heavy ... */
+static JsonNode *jarray = NULL;
+
+static int enumhelper(int keylen, char *key, int datalen, char *data)
+{
+	JsonNode *o = json_mkobject(), *j;
+	/* WARNING: `key' is not 0-terminated in db */
+	char geohash[12], **t;
+	int glen = (keylen > sizeof(geohash) - 1) ? sizeof(geohash) - 1 : keylen;
+	static char *tags[] = { "village", "locality", "cc", NULL };
+	GeoCoord g;
+
+	memcpy(geohash, key, glen);
+	geohash[glen] = 0;
+
+	g = geohash_decode(geohash);
+
+	json_append_member(o, "lat",		json_mknumber(g.latitude));
+	json_append_member(o, "lon",		json_mknumber(g.longitude));
+	json_append_member(o, "ghash",		json_mkstring(geohash));
+
+
+	/* Copy the string elements from the JSON in `data' into the new object */
+	if ((j = json_decode(data)) != NULL) {
+		for (t = tags; t && *t; t++) {
+			JsonNode *n;
+
+			if ((n = json_find_member(j, *t)) != NULL) {
+				if (n->tag == JSON_STRING) {
+					json_append_member(o, *t, json_mkstring(n->string_));
+				}
+			}
+		}
+		json_delete(j);
+	}
+
+	json_append_element(jarray, o);
+	return (0);
+}
+
+static int get_dumpall(struct MHD_Connection *connection)
+{
+	char *js;
+
+	jarray = json_mkarray();
+
+	db_enum(db, enumhelper);
+
+	if ((js = json_stringify(jarray, JSON_SPACE)) != NULL) {
+		int ret = send_content(connection, js, "application/json", MHD_HTTP_OK);
+		free(js);
+		json_delete(jarray);
+		return (ret);
+	}
+
+	json_delete(jarray);
+
+	return send_content(connection, "[]", "application/json", MHD_HTTP_OK);
+
+}
+
+/*
+ * Delete (kill) a geohash from the database.
+ * Yes, this should be a DELETE method...
+ */
+
+static int get_kill(struct MHD_Connection *connection)
+{
+	const char *geohash;
+	char *txt;
+	int rc;
+
+	geohash = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "geohash");
+	if (!geohash || !*geohash) {
+		return send_page(connection, "Missing geohash", 422);
+	}
+
+	rc = db_del(db, (char *)geohash);
+	txt = rc == 0 ? "deleted" : "Not deleted";
+
+	return send_page(connection, txt, (rc == 0) ? 200 : 404);
+}
+
+
+static int get_lookup(struct MHD_Connection *connection)
+{
+	const char *geohash;
+	char apbuf[8192];
+
+	geohash = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "geohash");
+	if (!geohash || !*geohash) {
+		return send_page(connection, "Missing geohash", 422);
+	}
+
+	if (db_get(db, (char *)geohash, apbuf, sizeof(apbuf)) < 0) {
+		return send_page(connection, "not found", 404);
+	}
+
+	return send_content(connection, apbuf, "application/json", MHD_HTTP_OK);
+}
+
+#if 0
 int jp_queryp(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	printf("param: %s=[%s]\n", key, value);
 	return (MHD_YES);
 }
+#endif
 
 int handle_connection(void *cls, struct MHD_Connection *connection,
 	const char *url, const char *method, const char *version,
@@ -402,75 +507,20 @@ int handle_connection(void *cls, struct MHD_Connection *connection,
 	if (strcmp(url, "/stats") == 0) {
 		return get_stats(connection);
 	}
-	return send_page(connection, "four-oh-four", MHD_HTTP_NOT_FOUND);
-}
 
-int printer_d(int keylen, char *key, int datalen, char *data)
-{
-	/* -1 because data _is_ 0-terminated */
-	printf("%*.*s %*.*s\n",
-		(int)keylen, (int)keylen, (char *)key,
-		(int)datalen - 1, (int)datalen - 1, (char *)data);
-	return (0);
-}
-
-int printer_D(int keylen, char *key, int datalen, char *data)
-{
-	/* WARNING: `key' is not 0-terminated */
-	char geohash[12];
-	int glen = (keylen > sizeof(geohash) - 1) ? sizeof(geohash) - 1 : keylen;
-	GeoCoord g;
-
-	memcpy(geohash, key, glen);
-	geohash[glen] = 0;
-
-	g = geohash_decode(geohash);
-
-	printf("%2lf,%2lf ", g.latitude, g.longitude);
-
-	return (printer_d(keylen, key, datalen, data));
-}
-
-int dump_all(bool bf)
-{
-	db_list(LMDB_DATABASE, NULL, (bf) ? printer_D : printer_d);
-	return (0);
-}
-
-int my_getstats(char *ip, short port)
-{
-	static UT_string *url, *curl_buf;
-	int rc = 0;
-
-	utstring_renew(url);
-	utstring_renew(curl_buf);
-
-	utstring_printf(url, "http://%s:%d/stats", ip, port);
-
-	revgeo_init();
-
-	if (http_get(UB(url), curl_buf) == false) {
-		fprintf(stderr, "Cannot GET %s\n", UB(url));
-		rc = 1;
-		goto out;
-	} else {
-		JsonNode *json;
-
-		if ((json = json_decode(UB(curl_buf))) != NULL) {
-			char *js = json_stringify(json, "   ");
-			if (js) {
-				printf("%s\n", js);
-				free(js);
-				rc = 0;
-			}
-			json_delete(json);
-		}
+	if (strcmp(url, "/dump") == 0) {
+		return get_dumpall(connection);
 	}
 
-   out:
-	revgeo_free();
+	if (strcmp(url, "/lookup") == 0) {
+		return get_lookup(connection);
+	}
 
-	return (rc);
+	if (strcmp(url, "/kill") == 0) {
+		return get_kill(connection);
+	}
+
+	return send_page(connection, "four-oh-four", MHD_HTTP_NOT_FOUND);
 }
 
 int main(int argc, char **argv)
@@ -478,7 +528,6 @@ int main(int argc, char **argv)
 	struct sockaddr_in sad;
 	char *s_ip, *s_port;
 	unsigned short port;
-	bool query = false, kill = false;
 	int ch;
 
 #ifdef STATSD
@@ -491,26 +540,13 @@ int main(int argc, char **argv)
 		s_port = LISTEN_PORT;
 	port = atoi(s_port);
 
-	while ((ch = getopt(argc, argv, "dDqsvk")) != EOF) {
+	while ((ch = getopt(argc, argv, "v")) != EOF) {
 		switch (ch) {
-			case 'D':
-			case 'd':
-				return dump_all(ch == 'D');
-				break; /* NOTREACHED */
-			case 'k':
-				kill = true;
-				break;
-			case 'q':
-				query = true;
-				break;
-			case 's':
-				return my_getstats(s_ip, port);
-				break; /* NOTREACHED */
 			case 'v':
 				printf("revgeod %s\n", VERSION);
 				exit(0);
 			default:
-				fprintf(stderr, "Usage: %s [-dD] [-k] [-q] [-s] [-v]\n", *argv);
+				fprintf(stderr, "Usage: %s [-v]\n", *argv);
 				exit(2);
 		}
 	}
@@ -518,33 +554,6 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (query || kill) {
-		struct db *db;
-		bool rdonly = !kill;
-
-		if ((db = db_open(LMDB_DATABASE, NULL, rdonly)) == NULL) {
-			perror(LMDB_DATABASE);
-			return (1);
-		}
-
-		while (*argv) {
-			char apbuf[8192], *geohash = *argv++;
-
-			if (db_get(db, geohash, apbuf, sizeof(apbuf)) > 0) {
-				if (kill) {
-					int rc = db_del(db, geohash);
-
-					printf("%s ", !rc ? "DELETED" : "ERROR");
-				}
-				printf("%s %s\n", geohash, apbuf);
-			} else {
-				printf("%s not found\n", geohash);
-			}
-		}
-
-		db_close(db);
-		return (0);
-	}
 
 	if ((apikey = getenv("OPENCAGE_APIKEY")) == NULL) {
 		fprintf(stderr, "OPENCAGE_APIKEY is missing in environment\n");

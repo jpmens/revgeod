@@ -9,12 +9,10 @@ export OPENCAGE_APIKEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 export REVGEO_IP=127.0.0.1
 export REVGEO_PORT=8865
 
-mkdir -p data/geocache/
-
 exec ./revgeod
 ```
 
-The `data/geocache/` directory (currently hardcoded) must exist and be writeable; that's where the LMDB database is stored. _revgeod_ caches OpenCage's responses (they explicitly permit this):
+The _geocache_ directory (currently hardcoded) must exist and be writeable; that's where the LMDB database is stored. _revgeod_ caches OpenCage's responses (they explicitly permit this):
 
 ![cache as long as you want](assets/airjp480.png)
 
@@ -24,30 +22,29 @@ The `data/geocache/` directory (currently hardcoded) must exist and be writeable
 $ curl -i 'http://127.0.0.1:8865/rev?lat=48.85593&lon=2.29431'
 HTTP/1.1 200 OK
 Connection: Keep-Alive
-Content-Length: 111
+Content-Length: 163
 Content-type: application/json
-Date: Tue, 23 Oct 2018 13:10:12 GMT
-```
-```json
-{"address":{"village":"4 r du Général Lambert, 75015 Paris, France","locality":"Paris","cc":"FR","s":"opencage"}}
+Date: Wed, 23 Jan 2019 14:08:43 GMT
+
+{
+    "address": {
+        "village": "4 r du Général Lambert, 75015 Paris, France",
+        "locality": "Paris",
+        "cc": "FR",
+        "s": "opencage"
+    }
+}
 ```
 
 A second query for the same location would respond with `lmdb` instead of `opencage` as the source, indicating it's been cached.
 
-```json
-{"address":{"village":"4 r du Général Lambert, 75015 Paris, France","locality":"Paris","cc":"FR","s":"lmdb"}}
-```
-
 ## query params
 
-The following query parameters are mandatory:
+The following query parameters are supported on the `/rev` endpoint:
 
-- `lat=` specify the latitude as a decimal
-- `lon=` specify the longitude as a decimal
-
-The following optional query parameters are supported:
-
-- `app=` specifies an "application" for which query statistics should be collected (see _statistics_ below).
+- `lat=` specify the latitude as a decimal (mandatory)
+- `lon=` specify the longitude as a decimal (mandatory)
+- `app=` specifies an "application" for which query statistics should be collected (see _statistics_ below) (optional)
 
 ## statistics
 
@@ -80,14 +77,16 @@ _revgeod_ provides statistics on its `/stats` endpoint:
 
 ## options
 
-The following command-line switches are supported:
+The following command-line switches are supported for _revgeod_:
 
-* `-d`: dump content of database (all keys/values) to stdout
-* `-D`: dump content of database (all keys/values) to stdout, lines prefixed by lat,lon
-* `-k`: kill (i.e. delete) individual geohashes
-* `-q`: query individual geohashes
-* `-s`: connect to _revgeod_ on its compiled-in address/port to obtain and print statistics
 * `-v`: show version and exit
+
+The following keywords are supported in _revgeoc_:
+
+* `stats`: connect to _revgeod_ on its compiled-in address/port to obtain and print statistics. Can also be specified as `-s` for backward compatibility.
+* `dump`: dump content of database (all keys/values) to stdout, lines areprefixed by lat,lon; can also be specified as `-d` or `-D`
+* `kill`: kill (i.e. delete) the specified geohash
+* `lookup`: query the specified geohash
 
 ## requirements
 
@@ -100,12 +99,13 @@ yum install lmdb
 ### debian
 
 ```
-apt-get install  liblmdb-dev lmdb-utils
+apt-get install  liblmdb-dev lmdb-utils curl libcurl3
 ```
 
 ### macos
 
 ```
+brew install curl
 brew install jpmens/brew/revgeod
 ```
 

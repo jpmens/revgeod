@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# revgeoc -- a client for revgeod
+#
+# Copyright (C) 2018-2019 Jan-Piet Mens <jp@mens.de>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+
+curl=curl
+opts="-sSf"
+opts="-i"
+
+host=${REVGEO_HOST:="127.0.0.1"}
+port=${REVGEO_PORT:=8865}
+
+
+case $1 in
+	dump|-d|-D)
+		q=dump
+		;;
+	stats|-s|version)
+		q=stats
+		;;
+	lookup)
+		if [ -z "$2" ]; then
+			echo "$0: lookup needs a geohash"
+			exit 2
+		fi
+
+		q="lookup?geohash=$2"
+		;;
+	kill)
+		if [ -z "$2" ]; then
+			echo "$0: kill needs a geohash"
+			exit 2
+		fi
+
+		q="kill?geohash=$2"
+		;;
+
+	test)
+		q="rev?lat=48.85593&lon=2.29431&app=revgeoc"
+		;;
+	
+	*)
+		echo "Usage: $0 [test|stats|dump|lookup|kill]" >&2
+		exit 2
+esac
+
+$curl $opts "http://$host:$port/$q" && echo
+

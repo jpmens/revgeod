@@ -6,7 +6,7 @@ tempdir=$(mktemp -d /tmp/ot-XXX)
 
 make install DESTDIR=$tempdir
 
-install -D c-mini-test.sh $tempdir/usr/share/doc/revgeod/c-mini-test.sh
+install -D README.md $tempdir/usr/share/doc/revgeod/README.md
 install -D etc/revgeod.service $tempdir/usr/share/doc/revgeod/revgeod.service
 
 name="revgeod"
@@ -35,6 +35,7 @@ fpm -s dir \
         -C $tempdir \
         -p ${debfile} \
         -d "libcurl3" \
+        -d "curl" \
         -d "liblmdb0" \
         -d "libmicrohttpd12" \
 	--config-files usr/local/etc/default/revgeod \
