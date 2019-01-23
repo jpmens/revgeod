@@ -38,11 +38,16 @@ install: revgeod
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/sbin
 	mkdir -p $(DESTDIR)/var/local/revgeod
 	chmod 755 $(DESTDIR)/var/local/revgeod
+	mkdir -p $(DESTDIR)$(INSTALLDIR)/share/man/man1 $(DESTDIR)$(INSTALLDIR)/share/man/man8
+	chmod 755 $(DESTDIR)$(INSTALLDIR)/share/man/man1 $(DESTDIR)$(INSTALLDIR)/share/man/man8
 	install -m 755 revgeoc $(DESTDIR)$(INSTALLDIR)/bin/revgeoc
 	install -m 755 revgeod $(DESTDIR)$(INSTALLDIR)/sbin/revgeod
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/etc/default
 	chmod 755 $(DESTDIR)$(INSTALLDIR)/etc/default
 	install -m 640 etc/revgeod.default $(DESTDIR)$(INSTALLDIR)/etc/default/revgeod
+
+	install -m 644 revgeod.1 $(DESTDIR)$(INSTALLDIR)/share/man/man1/revgeoc.1
+	install -m 644 revgeod.1 $(DESTDIR)$(INSTALLDIR)/share/man/man8/revgeod.1
 
 docs: revgeod.1 README.md
 
