@@ -43,3 +43,12 @@ install: revgeod
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/etc/default
 	chmod 755 $(DESTDIR)$(INSTALLDIR)/etc/default
 	install -m 640 etc/revgeod.default $(DESTDIR)$(INSTALLDIR)/etc/default/revgeod
+
+docs: revgeod.1 README.md
+
+revgeod.1: revgeod.pandoc Makefile
+	pandoc -s -w man+simple_tables -o $@ $<
+
+README.md: revgeod.pandoc Makefile
+	pandoc -s -w markdown_github+simple_tables $<  > $@
+#	pandoc -s -w markdown+simple_tables $< | sed -n -e '4,$$p' > $@
