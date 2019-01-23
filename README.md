@@ -144,9 +144,9 @@ CREDITS
 AVAILABILITY
 ============
 
-<http://github.com/jpmens/revgeod>
+<https://github.com/jpmens/revgeod>
 
 AUTHOR
 ======
 
-Jan-Piet Mens <http://jpmens.net>
+Jan-Piet Mens <https://jpmens.net>

@@ -1,6 +1,9 @@
+2019-01-23 version 0.2.9
+- UPD: new documentation and manpage
+- UPD: python module supports &app=
+- NEW: all queries via GET parameters (#3)
 
-
-2019-01-22 version 0.2.4
+2019-01-22 version 0.2.6
 - NEW: packaging for Debian (fpm)
 
 2019-01-20 version 0.2.2
