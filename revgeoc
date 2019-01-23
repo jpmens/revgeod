@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # revgeoc -- a client for revgeod
+# see https://github.com/jpmens/revgeod
 #
 # Copyright (C) 2018-2019 Jan-Piet Mens <jp@mens.de>
 #
