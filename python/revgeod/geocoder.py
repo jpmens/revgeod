@@ -2,7 +2,7 @@ import requests
 import json
 
 __author__    = 'Jan-Piet Mens <jp@mens.de>'
-__copyright__ = 'Copyright 2018 Jan-Piet Mens'
+__copyright__ = 'Copyright 2018--2019 Jan-Piet Mens'
 __license__   = """GNU General Public License"""
 
 class RevgeodGeocode(object):
@@ -18,9 +18,10 @@ class RevgeodGeocode(object):
 
     """
 
-    def __init__(self, host="127.0.0.1", port=8865):
+    def __init__(self, host="127.0.0.1", port=8865, app="python"):
 
         self.url = "http://{host}:{port}/rev".format(host=host, port=port)
+        self.appname = app
         self.session = requests.Session()
         self.session.headers.update({
                 "Content-type"  : "application/json"
@@ -33,6 +34,7 @@ class RevgeodGeocode(object):
         params = {
             u'lat' : float_it(lat),
             u'lon' : float_it(lon),
+            u'app' : self.appname,
         }
         data = None
 

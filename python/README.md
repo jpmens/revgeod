@@ -44,7 +44,7 @@ from revgeod.geocoder import RevgeodGeocode
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
 
-        geocoder = RevgeodGeocode(host="127.0.0.1", port=8865)
+        geocoder = RevgeodGeocode(host="127.0.0.1", port=8865, app="ansible")
         ret = []
         for term in terms:
             lat,lon =  term.split(',')
