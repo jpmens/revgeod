@@ -113,9 +113,11 @@ void db_close(struct db *db)
 	free(db);
 }
 
+/* Return 0 if keystr is deleted, nonzero otherwise */
+
 int db_del(struct db *db, char *keystr)
 {
-	int rc;
+	int rc, krc;
 	MDB_val key;
 	MDB_txn *txn;
 
@@ -128,9 +130,9 @@ int db_del(struct db *db, char *keystr)
 	key.mv_data	= keystr;
 	key.mv_size	= strlen(keystr);
 
-	rc = mdb_del(txn, db->dbi, &key, NULL);
-	if (rc != 0 && rc != MDB_NOTFOUND) {
-		syslog(LOG_ERR, "db_del: mdb_del: %s", mdb_strerror(rc));
+	krc = mdb_del(txn, db->dbi, &key, NULL);
+	if (krc != 0 && krc != MDB_NOTFOUND) {
+		syslog(LOG_ERR, "db_del: mdb_del: %s", mdb_strerror(krc));
 		/* fall through to commit */
 	}
 
@@ -139,7 +141,7 @@ int db_del(struct db *db, char *keystr)
 		syslog(LOG_ERR, "db_del: mdb_txn_commit: (%d) %s", rc, mdb_strerror(rc));
 		mdb_txn_abort(txn);
 	}
-	return (rc);
+	return (krc != 0);
 }
 
 /* Return 0 if record can be stored */
@@ -216,6 +218,7 @@ long db_get(struct db *db, char *k, char *buf, long buflen)
 	return (len);
 }
 
+
 void db_dump(char *path, char *lmdbname)
 {
 	struct db *db;
@@ -251,6 +254,39 @@ void db_dump(char *path, char *lmdbname)
 	mdb_cursor_close(cursor);
 	mdb_txn_commit(txn);
 	db_close(db);
+}
+
+/*
+ * enumerate. Invoke func() on all records in the open db. If func() returns 1, stop.
+ */
+
+int db_enum(struct db *db, int (*func)(int keylen, char *key, int datlen, char *data))
+{
+	MDB_val key, data;
+	MDB_txn *txn;
+	MDB_cursor *cursor;
+	int rc, stop;
+
+	key.mv_size = 0;
+	key.mv_data = NULL;
+
+	rc = mdb_txn_begin(db->env, NULL, MDB_RDONLY, &txn);
+	if (rc) {
+		syslog(LOG_ERR, "db_enum: mdb_txn_begin: (%d) %s", rc, mdb_strerror(rc));
+		return (rc);
+	}
+
+	rc = mdb_cursor_open(txn, db->dbi, &cursor);
+
+	while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
+		stop = func(key.mv_size, key.mv_data, data.mv_size, data.mv_data);
+		if (stop == 1) {
+			break;
+		}
+	}
+	mdb_cursor_close(cursor);
+	rc = mdb_txn_commit(txn);
+	return (rc);
 }
 
 void db_list(char *path, char *lmdbname, int (*func)(int keylen, char *key, int datlen, char *data))

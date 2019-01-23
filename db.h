@@ -37,6 +37,7 @@ int db_put(struct db *, char *ghash, char *payload);
 long db_get(struct db *, char *key, char *buf, long buflen);
 void db_dump(char *path, char *lmdbname);
 void db_list(char *path, char *lmdbname, int (*func)(int, char *, int, char *));
+int db_enum(struct db *db, int (*func)(int keylen, char *key, int datlen, char *data));
 void db_load(char *path, char *lmdbname);
 int db_del(struct db *db, char *keystr);
 size_t db_numentries(struct db *db);
