@@ -12,7 +12,7 @@
 
 curl=curl
 opts="-sSf"
-opts="-i"
+opts="${opts} ${revgeo_verbose:+-i}"
 
 host=${REVGEO_HOST:="127.0.0.1"}
 port=${REVGEO_PORT:=8865}
