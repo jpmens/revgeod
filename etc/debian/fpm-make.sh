@@ -2,6 +2,8 @@
 
 set -e
 
+umask 022
+
 tempdir=$(mktemp -d /tmp/ot-XXX)
 
 make install DESTDIR=$tempdir

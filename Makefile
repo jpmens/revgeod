@@ -34,8 +34,8 @@ clobber: clean
 	rm -f revgeod lmdb-ll-look
 
 install: revgeod
-	mkdir -p $(DESTDIR)$(INSTALLDIR)/bin
-	mkdir -p $(DESTDIR)$(INSTALLDIR)/sbin
+	[ -d $(DESTDIR)$(INSTALLDIR)/bin ] || ( mkdir -p $(DESTDIR)$(INSTALLDIR)/bin; chmod 755 $(DESTDIR)$(INSTALLDIR)/bin )
+	[ -d $(DESTDIR)$(INSTALLDIR)/sbin ] || ( mkdir -p $(DESTDIR)$(INSTALLDIR)/sbin; chmod 755 $(DESTDIR)$(INSTALLDIR)/sbin )
 	mkdir -p $(DESTDIR)/var/local/revgeod
 	chmod 755 $(DESTDIR)/var/local/revgeod
 	mkdir -p $(DESTDIR)$(INSTALLDIR)/share/man/man1 $(DESTDIR)$(INSTALLDIR)/share/man/man8
