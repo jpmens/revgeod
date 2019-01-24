@@ -128,6 +128,32 @@ Similarly to \f[C]lookup\f[], \f[C]/kill\f[] also expects a
 show version information and exit
 .RS
 .RE
+.SH ENVIRONMENT
+.TP
+.B \f[C]revgeo_verbose\f[]
+if this variable is set when \f[I]revgeoc\f[] starts, the program
+displays received HTTP headers
+.RS
+.RE
+.TP
+.B \f[C]OPENCAGE_APIKEY\f[]
+this mandatory variable must be set in \f[I]revgeod\f[]\[aq]s
+environment for it to do reverse geo lookups.
+.RS
+.RE
+.TP
+.B \f[C]REVGEO_HOST\f[]
+optionally sets the listen address for \f[I]revgeod\f[]; defaults to
+\f[C]127.0.0.1\f[] and we strongly recommend this is not changed to
+anything other than a loopback address.
+.RS
+.RE
+.TP
+.B \f[C]REVGEO_PORT\f[]
+optionally sets the TCP listen port to something other than the default
+\f[C]8865\f[].
+.RS
+.RE
 .SH REQUIREMENTS
 .SS rhel/centos
 .IP

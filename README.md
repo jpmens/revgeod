@@ -107,6 +107,21 @@ OPTIONS
 -v  
 show version information and exit
 
+ENVIRONMENT
+===========
+
+`revgeo_verbose`  
+if this variable is set when *revgeoc* starts, the program displays received HTTP headers
+
+`OPENCAGE_APIKEY`  
+this mandatory variable must be set in *revgeod*'s environment for it to do reverse geo lookups.
+
+`REVGEO_HOST`  
+optionally sets the listen address for *revgeod*; defaults to `127.0.0.1` and we strongly recommend this is not changed to anything other than a loopback address.
+
+`REVGEO_PORT`  
+optionally sets the TCP listen port to something other than the default `8865`.
+
 REQUIREMENTS
 ============
 
