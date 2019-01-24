@@ -5,6 +5,9 @@
 # Additional environment variables which are passed to the daemon
 # Uncomment and define as appropriate
 
-# OPENCAGE_APIKEY="xxx"
+# The following API key is severely limited, and it will quickly fail if
+# overused. Get your own, free of charge, at https://opencagedata.com/pricing
+
+OPENCAGE_APIKEY="11112222333344445555666677778888"
 # REVGEO_IP=127.0.0.1
 # REVGEO_PORT=8865
