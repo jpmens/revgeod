@@ -42,7 +42,7 @@
 #include "uptime.h"
 #include "uthash.h"
 #ifdef STATSD
-# include <statsd/statsd-client.h>
+# include "statsd/statsd-client.h"
 # define SAMPLE_RATE 1.0
 statsd_link *sd;
 #endif

@@ -5,17 +5,17 @@ LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
 INSTALLDIR = /usr/local
 
-ifneq ($(origin STATSDHOST), undefined)
-	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
-	CFLAGS += $(INC)
-	LDFLAGS += -lstatsdclient
-endif
-
 CFLAGS += -DLMDB_DATABASE=\"$(LMDB_DATABASE)\"
 CFLAGS += -DLISTEN_HOST=\"$(LISTEN_HOST)\"
 CFLAGS += -DLISTEN_PORT=\"$(LISTEN_PORT)\"
 
-OBJS = json.o geohash.o geo.o db.o uptime.o
+OBJS = json.o geohash.o geo.o db.o uptime.o 
+
+ifneq ($(origin STATSDHOST), undefined)
+	CFLAGS += -DSTATSD=\"$(STATSDHOST)\"
+	CFLAGS += $(INC)
+	OBJS += statsd/statsd-client.o
+endif
 
 all: revgeod lmdb-ll-look
 
