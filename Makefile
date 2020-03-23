@@ -1,6 +1,6 @@
 include config.mk
 
-CFLAGS= -Wall -Werror
+CFLAGS= -Wall -Werror $(INC)
 LDFLAGS=-lmicrohttpd -lcurl -llmdb $(LIBS)
 
 INSTALLDIR = /usr/local
@@ -25,7 +25,7 @@ revgeod: revgeod.c $(OBJS) Makefile version.h config.mk
 geo.o: geo.c json.h version.h
 
 lmdb-ll-look: lmdb-ll-look.c geohash.o json.o db.o
-	$(CC) $(CFLAGS) -o lmdb-ll-look lmdb-ll-look.c geohash.o json.o db.o -llmdb
+	$(CC) $(CFLAGS) -o lmdb-ll-look lmdb-ll-look.c geohash.o json.o db.o -llmdb $(LIBS)
 
 clean:
 	rm -f *.o
