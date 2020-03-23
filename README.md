@@ -116,14 +116,33 @@ if this variable is set when *revgeoc* starts, the program displays received HTT
 `OPENCAGE_APIKEY`  
 this mandatory variable must be set in *revgeod*'s environment for it to do reverse geo lookups.
 
-`REVGEO_HOST`  
+`REVGEO_IP`  
 optionally sets the listen address for *revgeod*; defaults to `127.0.0.1` and we strongly recommend this is not changed to anything other than a loopback address.
 
 `REVGEO_PORT`  
 optionally sets the TCP listen port to something other than the default `8865`.
 
+`REVGEO_HOST`  
+optionally sets the hostname/address for *revgeoc*; defaults to `127.0.0.1` and `REVGEO_PORT`
+
 REQUIREMENTS
 ============
+
+freebsd
+-------
+
+    $ pkg install curl
+    $ pkg install libmicrohttpd
+    $ pkg install lmdb
+
+    $ cat > config.mk <<EOF
+    # STATSDHOST=           "127.0.0.1"
+    LMDB_DATABASE= "data/geocache/"
+    LISTEN_HOST=   "127.0.0.1"
+    LISTEN_PORT=   "8865"
+    INC =           -I/usr/local/include
+    LIBS =          -L /usr/local/lib
+    EOF
 
 rhel/centos
 -----------

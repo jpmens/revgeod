@@ -142,7 +142,7 @@ environment for it to do reverse geo lookups.
 .RS
 .RE
 .TP
-.B \f[C]REVGEO_HOST\f[]
+.B \f[C]REVGEO_IP\f[]
 optionally sets the listen address for \f[I]revgeod\f[]; defaults to
 \f[C]127.0.0.1\f[] and we strongly recommend this is not changed to
 anything other than a loopback address.
@@ -154,7 +154,31 @@ optionally sets the TCP listen port to something other than the default
 \f[C]8865\f[].
 .RS
 .RE
+.TP
+.B \f[C]REVGEO_HOST\f[]
+optionally sets the hostname/address for \f[I]revgeoc\f[]; defaults to
+\f[C]127.0.0.1\f[] and \f[C]REVGEO_PORT\f[]
+.RS
+.RE
 .SH REQUIREMENTS
+.SS freebsd
+.IP
+.nf
+\f[C]
+$\ pkg\ install\ curl
+$\ pkg\ install\ libmicrohttpd
+$\ pkg\ install\ lmdb
+
+$\ cat\ >\ config.mk\ <<EOF
+#\ STATSDHOST=\ \ \ \ \ \ \ \ \ \ \ "127.0.0.1"
+LMDB_DATABASE=\ "data/geocache/"
+LISTEN_HOST=\ \ \ "127.0.0.1"
+LISTEN_PORT=\ \ \ "8865"
+INC\ =\ \ \ \ \ \ \ \ \ \ \ \-I/usr/local/include
+LIBS\ =\ \ \ \ \ \ \ \ \ \ \-L\ /usr/local/lib
+EOF
+\f[]
+.fi
 .SS rhel/centos
 .IP
 .nf
