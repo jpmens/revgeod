@@ -166,7 +166,8 @@ all
 ---
 
 -   [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
--   [statsd-c-client](https://github.com/romanbsd/statsd-c-client) (optional)
+-   [statsd-c-client](https://github.com/romanbsd/statsd-c-client) (optional and included)
+
 
 CREDITS
 =======
@@ -174,6 +175,7 @@ CREDITS
 -   `json.[ch]` by Joseph A. Adams.
 -   [uthash](https://troydhanson.github.io/uthash/), by Troy D. Hanson.
 -   [utstring](https://troydhanson.github.io/uthash/utstring.html), by Troy D. Hanson.
+-   [statsd-c-client](https://github.com/romanbsd/statsd-c-client), by Roman Shterenzon
 
 AVAILABILITY
 ============
