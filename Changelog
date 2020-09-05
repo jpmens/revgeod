@@ -1,4 +1,7 @@
 
+2020-09-05 version 0.3.2
+- NEW: document FreeBSD
+- NEW: statsd-c-client is now included
 - UPD: we have been granted a limited OpenCage API key for publication
 
 2019-01-24 version 0.3.0
