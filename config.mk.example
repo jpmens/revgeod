@@ -2,6 +2,7 @@
 
 # leave undefined if you don't want to use statsd
 STATSDHOST=		"127.0.0.1"
+# /var/local/revgeod
 LMDB_DATABASE=           "data/geocache/"
 LISTEN_HOST=            "127.0.0.1"
 LISTEN_PORT=		"8865"
