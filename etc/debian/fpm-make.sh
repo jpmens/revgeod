@@ -36,7 +36,7 @@ fpm -s dir \
         --url "https://github.com/jpmens/revgeod" \
         -C $tempdir \
         -p ${debfile} \
-        -d "libcurl3" \
+        -d "libcurl4" \
         -d "curl" \
         -d "liblmdb0" \
         -d "libmicrohttpd12" \
