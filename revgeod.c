@@ -58,6 +58,10 @@ statsd_link *sd;
 # define NOT_ACCEPTABLE MHD_HTTP_METHOD_NOT_ACCEPTABLE
 #endif
 
+#if MHD_VERSION < 0x00097002
+# define MHD_Result		int
+#endif
+
 static char *apikey;
 static struct db *db;
 struct MHD_Daemon *mhdaemon;
@@ -488,7 +492,7 @@ int jp_queryp(void *cls, enum MHD_ValueKind kind, const char *key, const char *v
 }
 #endif
 
-int handle_connection(void *cls, struct MHD_Connection *connection,
+MHD_Result handle_connection(void *cls, struct MHD_Connection *connection,
 	const char *url, const char *method, const char *version,
 	const char *upload_data, size_t *upload_data_size, void **con_cls)
 {
