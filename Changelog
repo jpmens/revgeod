@@ -1,4 +1,9 @@
 
+2021-11-15 version 0.3.4
+- FIX: Fedora 34 requires enum for libmicrohttpd-0.9.73
+- FIX: MHD changed return values of callbacks on handle_connection (#4)
+- FIX: s/libcurl3/libcurl4/ for buster in fpm-make.sh
+
 2020-09-05 version 0.3.2
 - NEW: document FreeBSD
 - NEW: statsd-c-client is now included
