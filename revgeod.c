@@ -62,6 +62,11 @@ statsd_link *sd;
 # define MHD_Result		int
 #endif
 
+#if MHD_VERSION == 0x00097300
+# define MHD_Result             enum MHD_Result
+#endif
+
+
 static char *apikey;
 static struct db *db;
 struct MHD_Daemon *mhdaemon;
