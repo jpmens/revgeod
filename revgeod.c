@@ -60,9 +60,7 @@ statsd_link *sd;
 
 #if MHD_VERSION < 0x00097002
 # define MHD_Result		int
-#endif
-
-#if MHD_VERSION == 0x00097300
+#else
 # define MHD_Result             enum MHD_Result
 #endif
 
