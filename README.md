@@ -64,7 +64,8 @@ The `/rev` endpoint is used to perform a reverse-geo lookup and cache the positi
     {
        "stats": {
           "_whoami": "revgeod.c",
-          "_version": "0.1.8",
+          "_version": "0.3.6",
+	  "_mhdversion": "0.9.75",
           "stats": 8,
           "requests": 13647,
           "geocode_failed": 9,

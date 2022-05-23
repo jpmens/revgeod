@@ -1,3 +1,6 @@
+2022-05-22 version 0.3.6
+- FIX: extend checking of libmicrohttpd version (#4)
+- NEW: add _mhdversion string to /stats endpoint result
 
 2021-11-15 version 0.3.4
 - FIX: Fedora 34 requires enum for libmicrohttpd-0.9.73

@@ -203,6 +203,7 @@ static int get_stats(struct MHD_Connection *connection)
 #ifdef STATSD
 	json_append_member(counters, "_statsd",		json_mkbool(true));
 #endif
+	json_append_member(counters, "_mhdversion",	json_mkstring(MHD_get_version()));
 	json_append_member(counters, "stats",		json_mknumber(++st.stats));
 	json_append_member(counters, "requests",	json_mknumber(st.requests));
 	json_append_member(counters, "geocode_failed",	json_mknumber(st.geofail));
