@@ -1,0 +1,28 @@
+#
+# 
+# Build
+# docker-compose build
+#
+# Run
+# docker-compose up -d 
+#
+version: "3.3"
+ 
+services:
+  revgeod:
+    build:
+      context: ./
+    container_name: revgeod
+    environment:
+      #- OPENCAGE_APIKEY=${OPENCAGE_APIKEY}     # set this in .env
+      - LOCATIONIQ_APIKEY=${LOCATIONIQ_APIKEY}  # set this in .env
+      - REVGEO_IP=0.0.0.0 # needed for access outside the container
+      - revgeo_verbose
+    ports:
+      - 8865:8865
+    volumes:
+      - store:/usr/src/app/data
+
+volumes:
+  store:
+   

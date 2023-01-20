@@ -8,3 +8,4 @@ revgeod
 lmdb-ll-look
 config.mk
 run.sh
+.env

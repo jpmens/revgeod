@@ -114,8 +114,14 @@ ENVIRONMENT
 `revgeo_verbose`  
 if this variable is set when *revgeoc* starts, the program displays received HTTP headers
 
+At least one of the following two _APIKEY variables needs to be set.
+When both are set `OPENCAGE_APIKEY` has priority.
+
 `OPENCAGE_APIKEY`  
-this mandatory variable must be set in *revgeod*'s environment for it to do reverse geo lookups.
+this optional variable must be set in *revgeod*'s environment for it to do reverse geo lookups via OpenCage.
+
+`LOCATIONIQ_APIKEY`  
+this optional variable must be set in *revgeod*'s environment for it to do reverse geo lookups via [LocationIQ](https://locationiq.com/demo#reverse).
 
 `REVGEO_IP`  
 optionally sets the listen address for *revgeod*; defaults to `127.0.0.1` and we strongly recommend this is not changed to anything other than a loopback address.
@@ -128,6 +134,15 @@ optionally sets the hostname/address for *revgeoc*; defaults to `127.0.0.1` and 
 
 REQUIREMENTS
 ============
+
+docker
+-----
+Create a .env file with an OPENCAGE_APIKEY or LOCATIONIQ_APIKEY variable defined.
+
+    $ docker-compose build
+    $ docker-compose up -d
+    $ docker-compose logs -f revgeod
+
 
 freebsd
 -------

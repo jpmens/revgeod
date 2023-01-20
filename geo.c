@@ -28,6 +28,7 @@
 #include "json.h"
 
 #define OPENCAGE_URL "https://api.opencagedata.com/geocode/v1/json?q=%lf+%lf&key=%s&abbrv=1&no_record=1&limit=1&format=json"
+#define LOCATIONIQ_URL "https://eu1.locationiq.com/v1/reverse?key=%s&lat=%lf&lon=%lf&normalize_address=1&normalizecity=1&format=json"
 
 static CURL *curl;
 
@@ -39,6 +40,92 @@ static size_t writemem(void *contents, size_t size, size_t nmemb, void *userp)
 	utstring_bincpy(curl_buf, contents, realsize);
 
 	return (realsize);
+}
+
+/*
+ * Decode the JSON string we got from Locationiq, which is now in `geodata'
+ * results_array is not filled
+ */
+
+static bool locationiq_decode(UT_string *geodata, UT_string *addr, UT_string *results_array, UT_string *locality, UT_string *cc)
+{
+	JsonNode *json, *display_name, *address;
+
+	/*
+	 * https://eu1.locationiq.com/v1/reverse?key=<Your_API_Access_Token>&lat=50.880067&lon=4.6695490&format=json
+	 *
+	 * {
+	 * "place_id": "118683862",
+	 * "licence": "https://locationiq.com/attribution",
+	 * "osm_type": "way",
+	 * "osm_id": "42772415",
+	 * "lat": "50.880016600000005",
+	 * "lon": "4.670175326848774",
+	 * "display_name": "Donorcentrum Leuven, 49, Ring Noord, Leuven, Flemish Brabant, Flanders, 3000, Belgium",
+	 * "address": {
+	 *	"address29": "Donorcentrum Leuven",
+	 *	"house_number": "49",
+	 *  "road": "Ring Noord",
+	 *	"city_district": "Leuven",
+	 *	"city": "Leuven",
+	 *	"county": "Leuven",
+	 *	"state": "Flemish Brabant",
+	 *	"region": "Flanders",
+	 *	"postcode": "3000",
+	 *	"country": "Belgium",
+	 *	"country_code": "be"
+	 * },
+	 * "boundingbox": [
+	 *	  "50.8797397",
+	 *	  "50.8802218",
+	 *	  "4.6697093",
+	 *	  "4.6706693"
+	 *   ]
+	 * }
+	 */
+
+	utstring_clear(results_array);
+
+	if ((json = json_decode(UB(geodata))) == NULL) {
+		fprintf(stderr, "Cannot decode JSON from %s\n", UB(geodata));
+		return (false);
+	}
+
+	// get addr from display_name 
+	display_name = json_find_member(json, "display_name");
+	if ((display_name != NULL) && (display_name->tag == JSON_STRING)) {
+		utstring_printf(addr, "%s", display_name->string_);
+	}
+
+	
+	if ((address = json_find_member(json, "address")) != NULL) {
+		JsonNode *j;
+
+		// get cc from 'country_code'
+		// and capitalize
+		if ((j = json_find_member(address, "country_code")) != NULL) {
+			if (j->tag == JSON_STRING) {
+				char *bp = j->string_;
+				int ch;
+
+				while (*bp) {
+					ch = (islower(*bp)) ? toupper(*bp) : *bp;
+					utstring_printf(cc, "%c", ch);
+					++bp;
+				}
+			}
+		}
+
+		// get locality from 'city'
+		if ((j = json_find_member(address, "city")) != NULL) {
+			if (j->tag == JSON_STRING) {
+				utstring_printf(locality, "%s", j->string_);
+			}
+		}
+	}
+
+	json_delete(json);
+	return (true);
 }
 
 /*
@@ -163,6 +250,10 @@ bool http_get(char *url, UT_string *curl_buf)
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writemem);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)curl_buf);
 
+	# DEBUG: see actual URL that is being called
+	#fprintf(stderr, "http_get(%s)\n", url);
+
+
 	res = curl_easy_perform(curl);
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
@@ -182,7 +273,7 @@ bool http_get(char *url, UT_string *curl_buf)
  * return true if OK, false otherwise
  */
 
-int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
+int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
 {
 	static UT_string *url;
 	static UT_string *curl_buf;
@@ -198,12 +289,23 @@ int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_str
 	utstring_renew(curl_buf);
 	utstring_clear(rawdata);
 
-	utstring_printf(url, OPENCAGE_URL, lat, lon, apikey);
+	if (strcmp(api_provider,"opencage") == 0) {
+		utstring_printf(url, OPENCAGE_URL, lat, lon, apikey);
 
-	bf = http_get(UB(url), curl_buf);
-	if (bf == true) {
-		if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
-			bf = false;
+		bf = http_get(UB(url), curl_buf);
+		if (bf == true) {
+			if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
+				bf = false;
+			}
+		}
+	}else{
+		utstring_printf(url, LOCATIONIQ_URL, apikey, lat, lon );
+
+		bf = http_get(UB(url), curl_buf);
+		if (bf == true) {
+			if ((rc = locationiq_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
+				bf = false;
+			}
 		}
 	}
 
