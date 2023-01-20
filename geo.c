@@ -250,7 +250,8 @@ bool http_get(char *url, UT_string *curl_buf)
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writemem);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)curl_buf);
 
-	fprintf(stderr, "http_get(%s)\n", url);
+	# DEBUG: see actual URL that is being called
+	#fprintf(stderr, "http_get(%s)\n", url);
 
 
 	res = curl_easy_perform(curl);
@@ -313,14 +314,11 @@ int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_
 
 void revgeo_init()
 {
-	fprintf(stderr, "revgeo_init()\n");
 	curl = curl_easy_init();
 }
 
 void revgeo_free()
 {
-	fprintf(stderr, "revgeo_free()\n");
-
 	curl_easy_cleanup(curl);
 	curl = NULL;
 }

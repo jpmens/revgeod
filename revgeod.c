@@ -49,7 +49,7 @@ statsd_link *sd;
 #endif
 #include "version.h"
 
-#define GEOHASH_PRECISION	9
+#define GEOHASH_PRECISION	8
 #define JSON_SPACE		"    "
 
 #ifdef MHD_HTTP_NOT_ACCEPTABLE

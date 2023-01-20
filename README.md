@@ -114,6 +114,9 @@ ENVIRONMENT
 `revgeo_verbose`  
 if this variable is set when *revgeoc* starts, the program displays received HTTP headers
 
+At least one of the following two _APIKEY variables needs to be set.
+When both are set `OPENCAGE_APIKEY` has priority.
+
 `OPENCAGE_APIKEY`  
 this optional variable must be set in *revgeod*'s environment for it to do reverse geo lookups via OpenCage.
 

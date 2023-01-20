@@ -25,7 +25,7 @@
 #include "db.h"
 
 #define DBFILE			"data/geocache"
-#define GEOHASH_PRECISION	9
+#define GEOHASH_PRECISION	8
 
 int main(int argc, char **argv)
 {
