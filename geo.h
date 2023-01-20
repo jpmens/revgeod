@@ -21,7 +21,7 @@
 #include "version.h"
 
 void revgeo_init();
-int revgeo_getdata(char *apikey, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc);
+int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc);
 void revgeo_free();
 bool http_get(char *url, UT_string *curl_buf);
 

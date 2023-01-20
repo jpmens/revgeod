@@ -49,7 +49,7 @@ statsd_link *sd;
 #endif
 #include "version.h"
 
-#define GEOHASH_PRECISION	8
+#define GEOHASH_PRECISION	9
 #define JSON_SPACE		"    "
 
 #ifdef MHD_HTTP_NOT_ACCEPTABLE
@@ -66,6 +66,7 @@ statsd_link *sd;
 
 
 static char *apikey;
+static char *api_provider;
 static struct db *db;
 struct MHD_Daemon *mhdaemon;
 
@@ -82,6 +83,7 @@ struct statistics {
 	unsigned long	requests;		/* total requests */
 	unsigned long	geofail;		/* geocoding failed */
 	unsigned long	opencage;
+	unsigned long	locationiq;
 	unsigned long	lmdb;
 	unsigned long	stats;			/* How often self called */
 } st;
@@ -207,6 +209,7 @@ static int get_stats(struct MHD_Connection *connection)
 	json_append_member(counters, "stats",		json_mknumber(++st.stats));
 	json_append_member(counters, "requests",	json_mknumber(st.requests));
 	json_append_member(counters, "geocode_failed",	json_mknumber(st.geofail));
+	json_append_member(counters, "locationiq",	json_mknumber(st.locationiq));
 	json_append_member(counters, "opencage",	json_mknumber(st.opencage));
 	json_append_member(counters, "lmdb",		json_mknumber(st.lmdb));
 
@@ -340,11 +343,15 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	 * reverse geo-encoding and store it here in LMDB.
 	 */
 
-	source = "opencage";
+	source = api_provider;
 	gettimeofday(&t_start_oc, NULL);
-	st.opencage++;
+	if (strcmp(api_provider,"opencage") == 0){
+		st.opencage++;
+	}else{
+		st.locationiq++;
+	}
 
-	if (revgeo_getdata(apikey, lat, lon, addr, rawdata, locality, cc) == true) {
+	if (revgeo_getdata(apikey, api_provider, lat, lon, addr, rawdata, locality, cc) == true) {
 		JsonNode *address_obj = json_mkobject();
 		char *js;
 		ap = UB(addr);
@@ -500,7 +507,7 @@ MHD_Result handle_connection(void *cls, struct MHD_Connection *connection,
 	const char *url, const char *method, const char *version,
 	const char *upload_data, size_t *upload_data_size, void **con_cls)
 {
-	// printf("%s %s %s\n", method, url, version);
+	// fprintf(stderr,"%s %s %s\n", method, url, version);
 	// MHD_get_connection_values(connection, MHD_HEADER_KIND, &print_kv, NULL);
 
 	if (strcmp(method, "GET") != 0) {
@@ -565,8 +572,15 @@ int main(int argc, char **argv)
 
 
 	if ((apikey = getenv("OPENCAGE_APIKEY")) == NULL) {
-		fprintf(stderr, "OPENCAGE_APIKEY is missing in environment\n");
-		exit(1);
+		fprintf(stderr, "OPENCAGE_APIKEY is missing in environment. Trying LOCATIONIQ_APIKEY\n");
+		if ((apikey = getenv("LOCATIONIQ_APIKEY")) == NULL) {
+			fprintf(stderr, "LOCATIONIQ_APIKEY is missing in environment. Exiting...\n");
+			exit(1);
+		}else{
+			api_provider = "locationiq";
+		}	
+	}else{
+		api_provider = "opencage";
 	}
 
 
