@@ -129,6 +129,13 @@ optionally sets the hostname/address for *revgeoc*; defaults to `127.0.0.1` and 
 REQUIREMENTS
 ============
 
+docker
+-----
+    $ docker-compose build
+    $ docker-compose up -d
+    $ docker-compose logs -f revgeod
+
+
 freebsd
 -------
 
