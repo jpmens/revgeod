@@ -1,0 +1,7 @@
+# definitions we use for OwnTracks
+
+STATSDHOST=		"127.0.0.1"
+LMDB_DATABASE=		"/var/local/revgeod"
+LISTEN_HOST=		"127.0.0.1"
+LISTEN_PORT=		"8865"
+INC=			-I../statsd/
