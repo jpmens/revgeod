@@ -1,6 +1,6 @@
 /*
  * revgeod
- * Copyright (C) 2018 Jan-Piet Mens <jp@mens.de>
+ * Copyright (C) 2018-2024 Jan-Piet Mens <jp@mens.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -133,9 +133,10 @@ static bool locationiq_decode(UT_string *geodata, UT_string *addr, UT_string *re
  * results_array becomes the JSON string of results[]
  */
 
-static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *results_array, UT_string *locality, UT_string *cc)
+static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *results_array, UT_string *locality, UT_string *cc, UT_string *tzname)
 {
 	JsonNode *json, *results, *address, *zeroth, *ac;
+	JsonNode *annotations, *timezone;
 
 	/*
 	* We are parsing this. I want the formatted in `addr'
@@ -187,6 +188,19 @@ static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *resu
 			address = json_find_member(zeroth, "formatted");
 			if ((address != NULL) && (address->tag == JSON_STRING)) {
 				utstring_printf(addr, "%s", address->string_);
+			}
+		}
+
+		if ((annotations = json_find_member(zeroth, "annotations")) != NULL) {
+			if ((timezone = json_find_member(annotations, "timezone")) != NULL) {
+				JsonNode *tz;
+
+				// puts(json_stringify(timezone, NULL));
+
+				if ((tz = json_find_member(timezone, "name")) != NULL)
+		{
+					utstring_printf(tzname, "%s", tz->string_);
+				}
 			}
 		}
 
@@ -273,7 +287,7 @@ bool http_get(char *url, UT_string *curl_buf)
  * return true if OK, false otherwise
  */
 
-int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc)
+int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc, UT_string *tzname)
 {
 	static UT_string *url;
 	static UT_string *curl_buf;
@@ -294,7 +308,7 @@ int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_
 
 		bf = http_get(UB(url), curl_buf);
 		if (bf == true) {
-			if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc)) == false) {
+			if ((rc = opencage_decode(curl_buf, addr, rawdata, locality, cc, tzname)) == false) {
 				bf = false;
 			}
 		}
@@ -328,7 +342,7 @@ int main()
 {
 	double lat = 49.0156556, lon = 8.3975169;
 	double clat = 48.85833, clon = 3.29513;
-	static UT_string *addr, *rawdata, *locality, *cc;
+	static UT_string *addr, *rawdata, *locality, *cc, *tzname;
 
 	char *apikey = getenv("OPENCAGE_APIKEY");
 
@@ -336,6 +350,7 @@ int main()
 	utstring_renew(rawdata);
 	utstring_renew(locality);
 	utstring_renew(cc);
+	utstring_renew(tzname);
 
 
 	if (apikey == NULL) {
@@ -345,7 +360,7 @@ int main()
 
 	revgeo_init();
 
-	if (revgeo_getdata(apikey, lat, lon, addr, rawdata, locality, cc)) {
+	if (revgeo_getdata(apikey, lat, lon, addr, rawdata, locality, cc, tzname)) {
 		printf("%s\n", UB(addr));
 	} else {
 		printf("Cannot get revgeo\n");
@@ -353,7 +368,7 @@ int main()
 
 	utstring_renew(addr);
 
-	if (revgeo_getdata(apikey, clat, clon, addr, rawdata, locality, cc)) {
+	if (revgeo_getdata(apikey, clat, clon, addr, rawdata, locality, cc, tzname)) {
 		printf("%s\n", UB(addr));
 		{
 			FILE *fp = fopen("1.1", "w");

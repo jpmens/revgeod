@@ -24,16 +24,17 @@ The (curently hardcoded) _geocache_ directory must exist and be writeable by the
 	$ curl -i 'http://127.0.0.1:8865/rev?lat=48.85593&lon=2.29431'
 	HTTP/1.1 200 OK
 	Connection: Keep-Alive
-	Content-Length: 163
+	Content-Length: 197
 	Content-type: application/json
-	Date: Wed, 23 Jan 2019 14:08:43 GMT
+	Date: Wed, 31 Jan 2024 10:44:14 GMT
 
 	{
 	    "address": {
 		"village": "4 r du Général Lambert, 75015 Paris, France",
 		"locality": "Paris",
 		"cc": "FR",
-		"s": "opencage"
+		"s": "opencage",
+		"tzname": "Europe/Paris"
 	    }
 	}
 

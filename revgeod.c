@@ -1,6 +1,6 @@
 /*
  * revgeod
- * Copyright (C) 2018-2019 Jan-Piet Mens <jp@mens.de>
+ * Copyright (C) 2018-2024 Jan-Piet Mens <jp@mens.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -249,7 +249,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	const char *s_lat, *s_lon, *s_app;
 	JsonNode *json, *obj;
 	char *geohash, *ap, *source, apbuf[8192];
-	static UT_string *addr, *rawdata, *locality, *cc;
+	static UT_string *addr, *rawdata, *locality, *cc, *tzname;
 	struct timeval t_stop_oc, t_start_oc;
 	struct appdata *app = NULL;
 #ifdef STATSD
@@ -298,6 +298,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	utstring_renew(rawdata);
 	utstring_renew(locality);
 	utstring_renew(cc);
+	utstring_renew(tzname);
 
 	json = json_mkobject();
 	obj = json_mkobject();
@@ -319,7 +320,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 			json_append_member(obj, "locality", json_mkstring("unknown"));
 			json_append_member(obj, "cc", json_mkstring("??"));
 		} else {
-			static char *elems[] = { "village", "locality", "cc", NULL }, **e;
+			static char *elems[] = { "village", "locality", "cc", "tzname", NULL }, **e;
 			JsonNode *el;
 
 			for (e = &elems[0]; e && *e; e++) {
@@ -351,7 +352,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 		st.locationiq++;
 	}
 
-	if (revgeo_getdata(apikey, api_provider, lat, lon, addr, rawdata, locality, cc) == true) {
+	if (revgeo_getdata(apikey, api_provider, lat, lon, addr, rawdata, locality, cc, tzname) == true) {
 		JsonNode *address_obj = json_mkobject();
 		char *js;
 		ap = UB(addr);
@@ -361,6 +362,11 @@ static int get_reversegeo(struct MHD_Connection *connection)
 		json_append_member(address_obj, "village",	json_mkstring(ap));
 		json_append_member(address_obj, "locality",	json_mkstring(UB(locality)));
 		json_append_member(address_obj, "cc",		json_mkstring(UB(cc)));
+		if (utstring_len(tzname) > 0) {
+			json_append_member(address_obj, "tzname",json_mkstring(UB(tzname)));
+		} else {
+			json_append_member(address_obj, "tzname",json_mknull());
+		}
 
 		if ((js = json_stringify(address_obj, JSON_SPACE)) != NULL) {
 			printf("[[%s]]\n", js);
@@ -389,6 +395,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	json_append_member(obj, "village",	json_mkstring(ap));
 	json_append_member(obj, "locality",	json_mkstring(UB(locality)));
 	json_append_member(obj, "cc",		json_mkstring(UB(cc)));
+	json_append_member(obj, "tzname",		json_mkstring(UB(tzname)));
 	json_append_member(obj, "s",		json_mkstring(source));
 	json_append_member(json, "address", obj);
 	return send_json(connection, json, lat, lon, geohash, source);

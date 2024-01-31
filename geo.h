@@ -1,6 +1,6 @@
 /*
  * revgeod
- * Copyright (C) 2018 Jan-Piet Mens <jp@mens.de>
+ * Copyright (C) 2018-2024 Jan-Piet Mens <jp@mens.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 #include "version.h"
 
 void revgeo_init();
-int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc);
+int revgeo_getdata(char *apikey, char *api_provider, double lat, double lon, UT_string *addr, UT_string *rawdata, UT_string *locality, UT_string *cc, UT_string *tzname);
 void revgeo_free();
 bool http_get(char *url, UT_string *curl_buf);
 
