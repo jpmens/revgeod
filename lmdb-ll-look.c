@@ -1,6 +1,6 @@
 /*
  * revgeod
- * Copyright (C) 2018 Jan-Piet Mens <jp@mens.de>
+ * Copyright (C) 2018-2024 Jan-Piet Mens <jp@mens.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,7 +45,6 @@ int main(int argc, char **argv)
 	}
 
 	while (fgets(buf, sizeof(buf), fp) != NULL) {
-		char *village = "unknown";
 		JsonNode *obj = NULL;
 
 		if (buf[strlen(buf) - 1] == '\n')
@@ -58,13 +57,12 @@ int main(int argc, char **argv)
 		if (db_get(db, geohash, apbuf, sizeof(apbuf)) > 0) {
 			if ((obj = json_decode(apbuf)) == NULL) {
 				fprintf(stderr, "Can't decode JSON ap\n");
-			} else {
-				village = obj->string_;
+				continue;
 			}
-		}
-		printf("%s %lf %lf %s\n", geohash, lat, lon, village);
-		if (obj != NULL) {
-			json_delete(obj);
+			printf("%s %lf %lf %s\n", geohash, lat, lon, json_stringify(obj, NULL));
+			if (obj != NULL) {
+				json_delete(obj);
+			}
 		}
 	}
 
