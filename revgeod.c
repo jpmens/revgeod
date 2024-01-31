@@ -319,6 +319,7 @@ static int get_reversegeo(struct MHD_Connection *connection)
 			json_append_member(obj, "village", json_mkstring("unknown"));
 			json_append_member(obj, "locality", json_mkstring("unknown"));
 			json_append_member(obj, "cc", json_mkstring("??"));
+			json_append_member(obj, "tzname", json_mknull());
 		} else {
 			static char *elems[] = { "village", "locality", "cc", "tzname", NULL }, **e;
 			JsonNode *el;
@@ -395,7 +396,11 @@ static int get_reversegeo(struct MHD_Connection *connection)
 	json_append_member(obj, "village",	json_mkstring(ap));
 	json_append_member(obj, "locality",	json_mkstring(UB(locality)));
 	json_append_member(obj, "cc",		json_mkstring(UB(cc)));
-	json_append_member(obj, "tzname",		json_mkstring(UB(tzname)));
+	if (utstring_len(tzname) > 0) {
+		json_append_member(obj, "tzname",json_mkstring(UB(tzname)));
+	} else {
+		json_append_member(obj, "tzname",json_mknull());
+	}
 	json_append_member(obj, "s",		json_mkstring(source));
 	json_append_member(json, "address", obj);
 	return send_json(connection, json, lat, lon, geohash, source);
@@ -410,7 +415,7 @@ static int enumhelper(int keylen, char *key, int datalen, char *data)
 	/* WARNING: `key' is not 0-terminated in db */
 	char geohash[12], **t;
 	int glen = (keylen > sizeof(geohash) - 1) ? sizeof(geohash) - 1 : keylen;
-	static char *tags[] = { "village", "locality", "cc", NULL };
+	static char *tags[] = { "village", "locality", "cc", "tzname", NULL };
 	GeoCoord g;
 
 	memcpy(geohash, key, glen);
