@@ -27,6 +27,12 @@ geo.o: geo.c json.h version.h
 lmdb-ll-look: lmdb-ll-look.c geohash.o json.o db.o
 	$(CC) $(CFLAGS) -o lmdb-ll-look lmdb-ll-look.c geohash.o json.o db.o -llmdb $(LIBS)
 
+db.o: db.c db.h
+geo.o: geo.c geo.h
+geohash.o: geohash.c geohash.h
+json.o: json.c json.h
+revgeod.o: revgeod.c geohash.h geo.h db.h json.h uptime.h uthash.h utstring.h version.h
+
 clean:
 	rm -f *.o
 
