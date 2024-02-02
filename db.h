@@ -23,8 +23,7 @@
 
 #include <lmdb.h>
 
-#define LMDB_DB_SIZE	((size_t)100000 * (size_t)(1024 * 1024))
-// #define LMDB_DB_SIZE    ((size_t)10240 * (size_t)(1024 * 1024))
+#define LMDB_DB_SIZE	((size_t)10 * 1024 * 1024 * 1024)
 
 struct db {
 	MDB_env *env;
