@@ -361,12 +361,12 @@ static int get_reversegeo(struct MHD_Connection *connection)
 		/* Store the full address as JSON in LMDB (JSON takes care of UTF-8) */
 
 		json_append_member(address_obj, "village",	json_mkstring(ap));
-		json_append_member(address_obj, "locality",	json_mkstring(UB(locality)));
 		json_append_member(address_obj, "cc",		json_mkstring(UB(cc)));
+		if (utstring_len(locality) > 0) {
+			json_append_member(address_obj, "locality", json_mkstring(UB(locality)));
+		}
 		if (utstring_len(tzname) > 0) {
-			json_append_member(address_obj, "tzname",json_mkstring(UB(tzname)));
-		} else {
-			json_append_member(address_obj, "tzname",json_mknull());
+			json_append_member(address_obj, "tzname", json_mkstring(UB(tzname)));
 		}
 
 		if ((js = json_stringify(address_obj, JSON_SPACE)) != NULL) {
