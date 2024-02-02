@@ -45,9 +45,12 @@ case $1 in
 	test)
 		q="rev?lat=48.85593&lon=2.29431&app=revgeoc"
 		;;
+	test-mx)
+		q="rev?lat=21.434299&lon=-87.3369650000&app=revgeoc"
+		;;
 	
 	*)
-		echo "Usage: $0 [test|stats|dump|lookup|kill]" >&2
+		echo "Usage: $0 [test|test-mx|stats|dump|lookup|kill]" >&2
 		exit 2
 esac
 
