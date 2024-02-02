@@ -394,7 +394,10 @@ static int get_reversegeo(struct MHD_Connection *connection)
 #endif
 
 	json_append_member(obj, "village",	json_mkstring(ap));
-	json_append_member(obj, "locality",	json_mkstring(UB(locality)));
+
+	if (utstring_len(locality) > 0) {
+		json_append_member(obj, "locality", json_mkstring(UB(locality)));
+	}
 	json_append_member(obj, "cc",		json_mkstring(UB(cc)));
 	if (utstring_len(tzname) > 0) {
 		json_append_member(obj, "tzname",json_mkstring(UB(tzname)));
