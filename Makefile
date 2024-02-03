@@ -58,9 +58,8 @@ install: revgeod
 docs: revgeod.1 README.md
 
 revgeod.1: revgeod.pandoc Makefile
-	# pandoc -s -w man+simple_tables -o $@ $<
 	pandoc -s -o $@ -f markdown $<
 
 README.md: revgeod.pandoc Makefile
-	pandoc -s -w gfm -f markdown $<  > $@
+	pandoc -s -w gfm -f markdown $<  | sed -e 1,3d  > $@
 #	pandoc -s -w markdown+simple_tables $< | sed -n -e '4,$$p' > $@

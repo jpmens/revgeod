@@ -1,6 +1,3 @@
----
-title: REVGEOD(8)/REVGEOC(1) User Manuals
----
 
 # NAME
 
