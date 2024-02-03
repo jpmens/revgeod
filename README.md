@@ -1,71 +1,82 @@
-NAME
-====
+---
+title: REVGEOD(8)/REVGEOC(1) User Manuals
+---
+
+# NAME
 
 revgeod - reverse-geo lookup daemon
 
 revgeoc - lookup client for revgeod
 
-SYNOPSIS
-========
+# SYNOPSIS
 
 revgeod \[-v\]
 
-revgeoc stats|dump|lookup|kill|test
+revgeoc stats\|dump\|lookup\|kill\|test
 
-DESCRIPTION
-===========
+# DESCRIPTION
 
-*revgeod* is a reverse Geo lookup daemon thing, accessible via HTTP and backed via [OpenCage](https://opencagedata.com), our geocoder of choice. You'll need an OpenCage API key exported into the environment, and you can specify *revgeod*'s listen IP address and port which default to `127.0.0.1` and `8865` respectively.
+*revgeod* is a reverse Geo lookup daemon thing, accessible via HTTP and
+backed via [OpenCage](https://opencagedata.com), our geocoder of choice.
+You’ll need an OpenCage API key exported into the environment, and you
+can specify *revgeod*’s listen IP address and port which default to
+`127.0.0.1` and `8865` respectively.
 
-The (curently hardcoded) *geocache* directory must exist and be writeable by the owner of the *rungeod* process; that's where the LMDB database is stored. *revgeod* caches OpenCage's responses (they explicitly permit this):
+The (curently hardcoded) *geocache* directory must exist and be
+writeable by the owner of the *rungeod* process; that’s where the LMDB
+database is stored. *revgeod* caches OpenCage’s responses (they
+explicitly permit this):
 
 *revgeoc* is the client program which speaks HTTP to *revgeod*.
 
-EXAMPLE
-=======
+# EXAMPLE
 
     $ curl -i 'http://127.0.0.1:8865/rev?lat=48.85593&lon=2.29431'
     HTTP/1.1 200 OK
     Connection: Keep-Alive
-    Content-Length: 163
+    Content-Length: 197
     Content-type: application/json
-    Date: Wed, 23 Jan 2019 14:08:43 GMT
+    Date: Wed, 31 Jan 2024 10:44:14 GMT
 
     {
         "address": {
         "village": "4 r du Général Lambert, 75015 Paris, France",
         "locality": "Paris",
         "cc": "FR",
-        "s": "opencage"
+        "s": "opencage",
+        "tzname": "Europe/Paris"
         }
     }
 
-A second query for the same location would respond with `lmdb` instead of `opencage` as the source, indicating it's been cached.
+A second query for the same location would respond with `lmdb` instead
+of `opencage` as the source, indicating it’s been cached.
 
-ENDPOINTS
-=========
+# ENDPOINTS
 
-All *revgeod* API endpoints are obtained via GET requests, and the client program *revgeoc* uses the same words as its commands.
+All *revgeod* API endpoints are obtained via GET requests, and the
+client program *revgeoc* uses the same words as its commands.
 
-`rev`
------
+## `rev`
 
-The `/rev` endpoint is used to perform a reverse-geo lookup and cache the positive result. This endpoint supports the following query parameters:
+The `/rev` endpoint is used to perform a reverse-geo lookup and cache
+the positive result. This endpoint supports the following query
+parameters:
 
--   `lat=` specify the latitude as a decimal (mandatory)
--   `lon=` specify the longitude as a decimal (mandatory)
--   `app=` specifies an "application" for which query statistics should be collected (see *statistics* below) (optional)
+- `lat=` specify the latitude as a decimal (mandatory)
+- `lon=` specify the longitude as a decimal (mandatory)
+- `app=` specifies an “application” for which query statistics should be
+  collected (see *statistics* below) (optional)
 
-`stats`
--------
+## `stats`
 
-*revgeod* provides statistics on its `/stats` endpoint, and it collects counters by *application* if the `app` query parameter is specified during lookups:
+*revgeod* provides statistics on its `/stats` endpoint, and it collects
+counters by *application* if the `app` query parameter is specified
+during lookups:
 
     {
        "stats": {
           "_whoami": "revgeod.c",
-          "_version": "0.3.6",
-	  "_mhdversion": "0.9.75",
+          "_version": "0.1.8",
           "stats": 8,
           "requests": 13647,
           "geocode_failed": 9,
@@ -85,67 +96,59 @@ The `/rev` endpoint is used to perform a reverse-geo lookup and cache the positi
        "db_size": 7532544
     }
 
-`dump`
-------
+## `dump`
 
-The `/dump` endpoint produces a full dump of the underling database in JSON format as an array of objects, each containing a *geohash*, the cached address information, and *lat* and *lon* elements which are the latitude and longitude respectively which have been decoded from the entries' *geohash*. Note that this means that the values are not those from which the entry originally resulted.
+The `/dump` endpoint produces a full dump of the underling database in
+JSON format as an array of objects, each containing a *geohash*, the
+cached address information, and *lat* and *lon* elements which are the
+latitude and longitude respectively which have been decoded from the
+entries’ *geohash*. Note that this means that the values are not those
+from which the entry originally resulted.
 
-`lookup`
---------
+## `lookup`
 
-This endpoint expects `geohash` query parameter with a *geohash* of precision 8; the key is looked up in the database and the JSON data or HTTP status code 404 are returned.
+This endpoint expects `geohash` query parameter with a *geohash* of
+precision 8; the key is looked up in the database and the JSON data or
+HTTP status code 404 are returned.
 
-`kill`
-------
+## `kill`
 
-Similarly to `lookup`, `/kill` also expects a *geohash* and removes it from the database.
+Similarly to `lookup`, `/kill` also expects a *geohash* and removes it
+from the database.
 
-OPTIONS
-=======
+# OPTIONS
 
 *revgeod* understands the following global options.
 
 -v  
 show version information and exit
 
-ENVIRONMENT
-===========
+# ENVIRONMENT
 
 `revgeo_verbose`  
-if this variable is set when *revgeoc* starts, the program displays received HTTP headers
-
-At least one of the following two _APIKEY variables needs to be set.
-When both are set `OPENCAGE_APIKEY` has priority.
+if this variable is set when *revgeoc* starts, the program displays
+received HTTP headers
 
 `OPENCAGE_APIKEY`  
-this optional variable must be set in *revgeod*'s environment for it to do reverse geo lookups via OpenCage.
-
-`LOCATIONIQ_APIKEY`  
-this optional variable must be set in *revgeod*'s environment for it to do reverse geo lookups via [LocationIQ](https://locationiq.com/demo#reverse).
+this mandatory variable must be set in *revgeod*’s environment for it to
+do reverse geo lookups.
 
 `REVGEO_IP`  
-optionally sets the listen address for *revgeod*; defaults to `127.0.0.1` and we strongly recommend this is not changed to anything other than a loopback address.
+optionally sets the listen address for *revgeod*; defaults to
+`127.0.0.1` and we strongly recommend this is not changed to anything
+other than a loopback address.
 
 `REVGEO_PORT`  
-optionally sets the TCP listen port to something other than the default `8865`.
+optionally sets the TCP listen port to something other than the default
+`8865`.
 
 `REVGEO_HOST`  
-optionally sets the hostname/address for *revgeoc*; defaults to `127.0.0.1` and `REVGEO_PORT`
+optionally sets the hostname/address for *revgeoc*; defaults to
+`127.0.0.1` and `REVGEO_PORT`
 
-REQUIREMENTS
-============
+# REQUIREMENTS
 
-docker
------
-Create a .env file with an OPENCAGE_APIKEY or LOCATIONIQ_APIKEY variable defined.
-
-    $ docker-compose build
-    $ docker-compose up -d
-    $ docker-compose logs -f revgeod
-
-
-freebsd
--------
+## freebsd
 
     $ pkg install curl
     $ pkg install libmicrohttpd
@@ -160,45 +163,39 @@ freebsd
     LIBS =          -L /usr/local/lib
     EOF
 
-rhel/centos
------------
+## rhel/centos
 
     yum install lmdb
 
-debian
-------
+## debian
 
     apt-get install  liblmdb-dev lmdb-utils curl libcurl3
 
-macos
------
+## macos
 
     brew install curl
     brew install jpmens/brew/revgeod
 
-This is documented [here](https://github.com/jpmens/homebrew-brew), and the homebrew version is typically kept in sync with this version.
+This is documented [here](https://github.com/jpmens/homebrew-brew), and
+the homebrew version is typically kept in sync with this version.
 
-all
----
+## all
 
--   [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
--   [statsd-c-client](https://github.com/romanbsd/statsd-c-client) (optional and included)
+- [libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
+- [statsd-c-client](https://github.com/romanbsd/statsd-c-client)
+  (optional)
 
+# CREDITS
 
-CREDITS
-=======
+- `json.[ch]` by Joseph A. Adams.
+- [uthash](https://troydhanson.github.io/uthash/), by Troy D. Hanson.
+- [utstring](https://troydhanson.github.io/uthash/utstring.html), by
+  Troy D. Hanson.
 
--   `json.[ch]` by Joseph A. Adams.
--   [uthash](https://troydhanson.github.io/uthash/), by Troy D. Hanson.
--   [utstring](https://troydhanson.github.io/uthash/utstring.html), by Troy D. Hanson.
--   [statsd-c-client](https://github.com/romanbsd/statsd-c-client), by Roman Shterenzon
-
-AVAILABILITY
-============
+# AVAILABILITY
 
 <https://github.com/jpmens/revgeod>
 
-AUTHOR
-======
+# AUTHOR
 
 Jan-Piet Mens <https://jpmens.net>
