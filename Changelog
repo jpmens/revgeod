@@ -1,3 +1,10 @@
+
+2024-02-06 version 0.3.8
+- NEW: add support for caching tzname from opencagedata
+- UPD: don't store locality, tzname if they're not set
+- NEW: revgeoc: add test-mx as an example without locality and a distinct tzname
+- NEW: add NOTES.md on how we use revgeod with Traccar
+
 2022-05-22 version 0.3.6
 - FIX: extend checking of libmicrohttpd version (#4)
 - NEW: add _mhdversion string to /stats endpoint result

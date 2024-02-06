@@ -1,3 +1,3 @@
-#define VERSION "0.3.7"
+#define VERSION "0.3.8"
 
 #define USER_AGENT	"revgeod/"VERSION
