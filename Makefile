@@ -53,7 +53,7 @@ install: revgeod
 	install -m 640 etc/revgeod.default $(DESTDIR)$(INSTALLDIR)/etc/default/revgeod
 
 	install -m 644 revgeod.1 $(DESTDIR)$(INSTALLDIR)/share/man/man1/revgeoc.1
-	install -m 644 revgeod.1 $(DESTDIR)$(INSTALLDIR)/share/man/man8/revgeod.1
+	install -m 644 revgeod.1 $(DESTDIR)$(INSTALLDIR)/share/man/man8/revgeod.8
 
 docs: revgeod.1 README.md
 
