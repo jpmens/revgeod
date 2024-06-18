@@ -139,7 +139,7 @@ static bool opencage_decode(UT_string *geodata, UT_string *addr, UT_string *resu
 	JsonNode *annotations, *timezone;
 
 	/*
-	* We are parsing this. I want the formatted in `addr'
+	* We are parsing this. I want the value of `formatted` in `addr'
 	*
 	* {
 	*   "documentation": "https://geocoder.opencagedata.com/api",
