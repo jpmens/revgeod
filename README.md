@@ -166,7 +166,7 @@ optionally sets the hostname/address for *revgeoc*; defaults to
 
 ## debian
 
-    apt-get install  liblmdb-dev lmdb-utils curl libcurl3
+    apt-get install  libmicropttpd-dev liblmdb-dev lmdb-utils curl libcurl3
 
 ## macos
 
