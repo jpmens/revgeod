@@ -17,7 +17,7 @@ ifneq ($(origin STATSDHOST), undefined)
 	OBJS += statsd/statsd-client.o
 endif
 
-all: revgeod lmdb-ll-look
+all: revgeod lmdb-ll-look lmdb-mydump
 
 revgeod: revgeod.c $(OBJS) Makefile version.h config.mk
 	$(CC) $(CFLAGS) -o revgeod revgeod.c $(OBJS) $(LDFLAGS)
@@ -26,6 +26,9 @@ geo.o: geo.c json.h version.h
 
 lmdb-ll-look: lmdb-ll-look.c geohash.o json.o db.o
 	$(CC) $(CFLAGS) -o lmdb-ll-look lmdb-ll-look.c geohash.o json.o db.o -llmdb $(LIBS)
+
+lmdb-mydump: lmdb-mydump.c json.o db.o
+	$(CC) $(CFLAGS) -o lmdb-mydump lmdb-mydump.c json.o db.o -llmdb $(LIBS)
 
 db.o: db.c db.h
 geo.o: geo.c geo.h
